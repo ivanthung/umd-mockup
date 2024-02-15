@@ -3,9 +3,10 @@ import pandas as pd
 import utils.utils as utils
 import numpy as np
 import matplotlib.pyplot as plt
+import utils.layout as layout
 
-
-# Cartography settings
+layout.set_page_title("Pas project aan")
+session = st.session_state
 
 bag_columns = [
     "transform",
@@ -16,19 +17,7 @@ bag_columns = [
     "bouwjaar",
 ]
 
-st.set_page_config(layout="wide", page_title="Urban Mining Dashboard")
-session = st.session_state
-
-col1, col2 = st.columns((1, 5))
-with col1:
-    st.image("resources/Amsterdam City.png", width=200)
-
-with col2:
-    st.title("Zuid-oost projecten")
-
-st.divider()
 col1, col2 = st.columns(2)
-
 with col1:
     st_data = utils.create_project_map(session.geometry_bag)
 
@@ -39,14 +28,3 @@ with col2:
         utils.display_project_data(df = session.gdf_bag, selected_point_id= selected_point_id, coords=coords)
     except:
         st.write("Please select a project on the map")
-
-st.divider()
-
-cola, colb, colc = st.columns(3)
-
-st.write(
-    "Here's some dummy text for the results of the analysis. We can add more metrics and visualizations as needed."
-)
-
-
-print("Ran at: ", pd.Timestamp.now())

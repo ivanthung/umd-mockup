@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import utils.utils as utils
+import utils.layout as layout
 import numpy as np
 
 # Cartography settings
@@ -41,14 +42,8 @@ mfa_data = {
     "Value": [250, 100, 50, 25, 300, 200, 150, 150, 100, 75],
 }
 
-st.set_page_config(layout="wide", page_title="Urban Mining Dashboard")
+layout.set_page_title("Sloop en nieuwbouw")
 session = st.session_state
-
-if "gdf_bag" not in session:
-    gdf_bag = utils.load_data()
-    session.geometry_bag = gdf_bag
-    session.gdf_bag = gdf_bag.drop(columns="geometry")
-
 
 def update_data():
     """Check this out for the data editor: https://github.com/streamlit/streamlit/issues/7749#issuecomment-1910188358"""
@@ -57,19 +52,7 @@ def update_data():
             session.gdf_bag.loc[idx, label] = value
 
 
-col1, col2 = st.columns((1, 5))
-with col1:
-    st.image("resources/Amsterdam City.png", width=200)
-
-with col2:
-    st.title("Urban Mining Dashboard")
-    st.write(
-        "This is a mock-up of the Urban Mining Dashboard for internal testing. It is not connected to any real data."
-    )
-
-st.divider()
 col1, col2 = st.columns(2)
-
 with col1:
     st_data = utils.create_map(session.geometry_bag, session.gdf_bag)
 

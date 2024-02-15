@@ -1,8 +1,15 @@
+#todo
+# Add sloop woning
+# Indicator behouden woningen.
+# Typologieen.
+# Gekozen strategieen.
+# Report download button / layout. 
 
 import streamlit as st
 import utils.utils as utils
+import utils.layout as layout
 
-st.set_page_config(page_title="Resultaten", layout="wide")
+layout.set_page_title("Resultaten")
 session = st.session_state
 
 mfa_data = {
@@ -32,8 +39,6 @@ mfa_data = {
     ],
     "Value": [250, 100, 50, 25, 300, 200, 150, 150, 100, 75],
 }
-
-st.title("Resultaten")
 fig = utils.display_dummy_sankey(session.gdf_bag , mfa_data)
 st.plotly_chart(fig)
 

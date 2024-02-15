@@ -1,5 +1,6 @@
 import streamlit as st
 import utils.utils as utils
+from streamlit_extras.app_logo import add_logo
 
 st.set_page_config(
     layout='wide',
@@ -13,14 +14,11 @@ if "gdf_bag" not in session:
     session.geometry_bag = gdf_bag
     session.gdf_bag = gdf_bag.drop(columns="geometry")
 
-col1, col2 = st.columns((1, 4))
-
+col1, col2 = st.columns((1, 3))
 with col1:
     st.image("resources/Amsterdam City.png", width=200)
-
 with col2:
-    st.title("About the Urban Mining Dashboard")
-
+    st.title("Urban Mining Dashboard")
 st.divider()
 
 st.markdown(
