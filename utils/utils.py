@@ -11,7 +11,7 @@ amsterdam_zuidoost = (52.309033724116524, 4.967533318175478)
 zoom_start = 13
 tiles = "Cartodb Positron"
 popup_fields = ["fuuid", "bouwjaar", "gebruiksdo", "sloop", "transform"]
-file_location = "/Users/ivanthung/code/mock-up-umdashboard/spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
+file_location = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
 
 
 def load_data() -> gpd.GeoDataFrame:
