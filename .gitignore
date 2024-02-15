@@ -1,0 +1,6 @@
+.env
+/test_files/
+/spatial_data/boundaries/
+/spatial_data/QGIS/
+/spatial_data/shp/
+/spatial_data/shp-amsterdam/
