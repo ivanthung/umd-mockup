@@ -33,12 +33,10 @@ def display_dummy_sankey(gdf_bag, data) -> go.Figure:
 
     df = pd.DataFrame(data)
 
-    print(gdf_bag.head())
     for s in df["source"].unique():
         df.loc[df["source"] == s, "Value"] = df.loc[df["source"] == s, "Value"] * len(
             gdf_bag[gdf_bag["use"] == s]
         )
-    print(df.head())
 
     all_nodes = list(set(df["source"]).union(set(df["target"])))
     node_dict = {node: i for i, node in enumerate(all_nodes)}
