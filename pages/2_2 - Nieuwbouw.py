@@ -148,6 +148,7 @@ col2.dataframe(realisation_df, use_container_width=True, hide_index=True)
 
 st.markdown("##")
 layout.save_scenario_form(
+    to_file=False,
     building_profiles=session.building_profile,
     woning_typologie_m2=session.building_size_slider,
     impact_df=impact_df,

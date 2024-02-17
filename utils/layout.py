@@ -13,7 +13,7 @@ def set_page_title(title: str, divider: bool = True) -> None:
     
     st.divider() if divider else None
 
-def save_scenario_form(**kwargs) -> None:
+def save_scenario_form(to_file= False,**kwargs) -> None:
     """ Displays the form to save a scenario to the session state. Input as kwargs all the variables that need to be saved with their right naming."""
     
     with st.form("scenario_form"): 
@@ -22,7 +22,6 @@ def save_scenario_form(**kwargs) -> None:
         if submit_button:
             if "scenarios" not in st.session_state:
                 st.session_state.scenarios = {}  
-            utils.save_scenario_to_session_state(scenarion_name, kwargs)
             st.success(f"Scenario '{scenarion_name}' saved successfully!")
-    
-    utils.save_scenario_to_file()
+    if not to_file:
+        utils.save_scenario_to_file()

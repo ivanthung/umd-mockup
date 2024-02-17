@@ -32,13 +32,15 @@ if 'scenarios' in session and len(session.scenarios):
 
     for scenario in to_delete:
         del session.scenarios[scenario]
-        utils.save_scenario_to_file()
+        # utils.save_scenario_to_file()
         st.success(f"Scenario '{scenario}' removed from file.")
         st.rerun()
 else: 
     st.write("No scenarios found")
 
 st.divider()
+
+
 
 def show_mfa():
     mfa_data = {
