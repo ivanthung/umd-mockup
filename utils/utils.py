@@ -59,7 +59,6 @@ def save_scenario_to_session_state(scenario_name, data_to_save: dict):
     for attribute, value in data_to_save.items():
         session.scenarios[scenario_name][attribute] = deepcopy(value)
 
-
 def display_dummy_sankey(gdf_bag, data) -> go.Figure:
     """Create a dummy sankey plot, just to test the layout and interactivity"""
 

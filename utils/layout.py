@@ -22,7 +22,7 @@ def save_scenario_form(to_file= False,**kwargs) -> None:
         if submit_button:
             if "scenarios" not in st.session_state:
                 st.session_state.scenarios = {}  
-            st.session_state.scenarios[scenarion_name] = kwargs
+            utils.save_scenario_to_session_state(scenarion_name, kwargs)
             st.success(f"Scenario '{scenarion_name}' saved successfully!")
     if not to_file:
         utils.save_scenario_to_file()
