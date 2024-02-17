@@ -1,18 +1,21 @@
 import geopandas as gpd
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 import numpy as np
 import folium
 from streamlit_folium import st_folium
 import streamlit as st
 import matplotlib.pyplot as plt
+import pickle
+from copy import deepcopy
 
+session = st.session_state
 amsterdam_zuidoost = (52.309033724116524, 4.967533318175478)
 zoom_start = 13
 tiles = "Cartodb Positron"
 popup_fields = ["fuuid", "bouwjaar", "gebruiksdo", "sloop", "transform"]
 file_location = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
-
 
 def load_data() -> gpd.GeoDataFrame:
     """Load the BAG data and create a dummy column for the transformation and demolition of buildings"""
@@ -26,6 +29,35 @@ def load_data() -> gpd.GeoDataFrame:
         ["Apartment", "Office", "Low-Rise"], size=len(gdf_bag)
     )
     return gdf_bag
+
+def load_scenario_from_file():
+    """Load the data from a pickle assign it as a dictionary to the session state variable"""
+    if not 'scenarios' in session:
+        try:
+            with open('scenarios/scenario_data.pickle', 'rb') as f:
+                loaded_data = pickle.load(f)
+                session.scenarios = loaded_data
+        except: 
+            st.write("No scenarios found")
+
+def load_first_scenario():
+    """Load the first scenario from the session state variable"""
+    
+    if 'scenarios' in session and len(session.scenarios):
+        session.building_profile = session.scenarios[list(session.scenarios.keys())[0]]['building_profiles']
+        session.building_size_slider = session.scenarios[list(session.scenarios.keys())[0]]['woning_typologie_m2']
+        print("Loaded first scenario from file")
+
+def save_scenario_to_file():
+    """Save the data from the session state variable to a pickle file"""
+    with open('scenarios/scenario_data.pickle', 'wb') as f:
+        pickle.dump(session.scenarios, f)
+
+def save_scenario_to_session_state(scenario_name, data_to_save: dict):
+    """Save the data that we want to keep for the current scenario to the scenario's session state variable"""
+    session.scenarios[scenario_name] = {}
+    for attribute, value in data_to_save.items():
+        session.scenarios[scenario_name][attribute] = deepcopy(value)
 
 
 def display_dummy_sankey(gdf_bag, data) -> go.Figure:
@@ -176,3 +208,24 @@ def display_project_data(df, selected_point_id, coords):
     with col2:
         display_project_shape_diagram(coords)
 
+
+def display_scenario_comparison():
+    scenario_dfs = {}
+    for key, value in session.scenarios.items():
+        scenario_dfs[key] = pd.DataFrame(value['building_profiles'])
+    
+    combined_df = pd.concat(scenario_dfs.values(), keys=scenario_dfs.keys())
+    combined_df.reset_index(level=0, inplace=True)
+    melted_df = combined_df.melt(id_vars='level_0', var_name='Gebouwprofiel', value_name='Totale impact')
+    melted_df.rename(columns={'level_0': 'Scenario'}, inplace=True)
+
+    fig = px.bar(
+        melted_df, 
+        x="Scenario", 
+        y="Totale impact",
+        # Or use y="Normalized Share" if you calculated relative shares
+        color="Gebouwprofiel",
+        barmode='stack',  # Create stacked bars
+        title="Stacked Bar Chart of Gebouwprofiel Impact Across Scenarios"
+    )
+    st.plotly_chart(fig)
