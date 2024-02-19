@@ -100,7 +100,7 @@ with tabs1:
     building_type = col2.selectbox("Gebouwtype", bu_ty)
     secondary_type = col3.selectbox("Profiel", se_ty)
 
-    if col1.button("Voeg gebouwprofiel toe"):
+    if col1.button("Voeg gebouw toe"):
         if building_type not in session.building_profile:
             session.building_profile[building_type] = {}
         session.building_profile[building_type][secondary_type] = session.building_profile[building_type].get(secondary_type, 0)
