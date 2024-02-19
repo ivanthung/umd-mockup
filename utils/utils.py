@@ -208,7 +208,7 @@ def display_project_data(df, selected_point_id, coords):
         display_project_shape_diagram(coords)
 
 
-def display_scenario_comparison():
+def create_scenario_comparison():
     scenario_dfs = {}
     for key, value in session.scenarios.items():
         scenario_dfs[key] = pd.DataFrame(value['building_profiles'])
@@ -227,4 +227,4 @@ def display_scenario_comparison():
         barmode='stack',  # Create stacked bars
         title="Stacked Bar Chart of Gebouwprofiel Impact Across Scenarios"
     )
-    st.plotly_chart(fig)
+    return fig

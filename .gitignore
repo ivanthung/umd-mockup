@@ -4,3 +4,5 @@
 /spatial_data/QGIS/
 /spatial_data/shp/
 /spatial_data/shp-amsterdam/
+*.DS_Store
+/.streamlit/secrets.toml

@@ -6,6 +6,8 @@ import streamlit as st
 import utils.utils as utils
 import utils.layout as layout
 import utils.column_configs as column_configs
+from utils.AIreport import produce_report
+from utils.reportgenerator import generate_report_pdf
 
 
 layout.set_page_title("Resultaten")
@@ -18,10 +20,26 @@ if 'scenarios' in session and len(session.scenarios):
 
     with tabs[0]:
         col1, col2 = st.columns((1,2))
+        comparison_fig = utils.create_scenario_comparison()
         with col1:
-            st.write("Here you can compare the scenarios. More to come.")
+            container = st.empty()
+            
+            if 'ai_report_text' not in session:
+                st.button("Create AI-generated report (experimental)", on_click=produce_report, args=(container,))
+            else:
+                st.write(session['ai_report_text'])
+
+                with st.spinner("Generating report..."):
+                    pdf_bytes = generate_report_pdf(session['ai_report_text'], {"comparison": comparison_fig})
+                    st.download_button(
+                        label="Download report",
+                        data=pdf_bytes,
+                        file_name="report.pdf",
+                        mime="application/pdf",
+                    )
+            
         with col2:
-            utils.display_scenario_comparison()
+            st.plotly_chart(comparison_fig)
 
     for i, (scenario, scenario_data) in enumerate(session.scenarios.items()):
         with tabs[i+1]:
@@ -73,4 +91,3 @@ def show_mfa():
 
     fig = utils.display_dummy_sankey(session.gdf_bag , mfa_data)
     st.plotly_chart(fig)
-

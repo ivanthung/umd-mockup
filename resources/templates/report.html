@@ -1,17 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monitoring Report</title>
-<link rel="stylesheet" href="styles.css">
+    <title>My Report</title>
+    <style>
+        body {
+            background-color: white; /* Very light grey background */
+        }
+
+        .container {
+            display: flex; /* Use flexbox for columns */
+        }
+
+        .left-column {
+            flex: 1; /* Equal column widths */
+        }
+
+        .right-column {
+            flex: 1;
+            margin-left: 20px; /* Space between columns */
+        }
+
+        .logo {
+            width: 100px; 
+            height: 100px; 
+            float: left;   /* Float the logo left */
+            margin-right: 20px;
+        }
+
+        .img {
+            width: 30%;
+            margin-bottom: 20px; /* Add space between figures */
+        }
+
+        .title {
+            clear: both;   /* Ensure title is below the logo */
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  <h1>Monitoring report</h1>
-  <p class="intro">[Lorem ipsum text...]</p>
-  <div class="table" aria-label="Placeholder for table"></div>
-  <div class="graph" aria-label="Placeholder for graph"></div>
-</div>
+    <div class="container">
+        <div class="left-column">
+          <img class="logo" src="resources/Metabolic_logo.png" alt="Logo"> 
+          <h1 class="title">Urban Mining Potential Assessment Report</h1>
+          {{text}}
+        </div>
+        <div class="right-column">
+            {{figs_html}}
+        </div>
+    </div>
 </body>
 </html>
