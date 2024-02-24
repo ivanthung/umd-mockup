@@ -1,0 +1,1256 @@
+FILE: /Users/ivanthung/code/mock_up_umdashboard/readmeprep.py
+CODE: import os
+import inspect
+
+
+def gather_code_info(directory):
+    """Walks a directory and gathers code files, function names, and docstrings."""
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith((".py")):  # Focus on Python for this example
+                filepath = os.path.join(root, file)
+                try:  # Add error handling
+                    with open(filepath, "r") as f:
+                        code = f.read()
+                    yield filepath, code
+                except Exception as e:
+                    print(f"Error processing file {filepath}: {e}")  # Print errors
+
+
+if __name__ == "__main__":
+    current_dir = os.getcwd()
+
+    with open("code_info.txt", "w") as f:
+        for filepath, func_name in gather_code_info(current_dir):
+            f.write("FILE: {}\n".format(filepath))
+            f.write("CODE: {}\n".format(func_name))
+            f.write("----------------\n")
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/__init__.py
+CODE: 
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/Start.py
+CODE: """ Starting page for the Streamlit app"""
+
+import streamlit as st
+from utils import data_manager
+from utils import layout
+from streamlit_extras.app_logo import add_logo
+
+session = st.session_state
+layout.set_page_title("About")
+data_manager.load_bag_data()
+
+st.markdown(
+    """
+    Boilerplate dummy text:
+
+* **Over Urban Mining:**
+    * Urban mining is de kunst om steden te zien als bronnen voor waardevolle materialen. Door grondstoffen terug te winnen uit onze bestaande gebouwde omgeving, beperken we afval en sparen we natuurlijke hulpbronnen.
+* **Metabolic's Missie:**
+    * Metabolic versnelt de transitie naar een duurzame, circulaire economie. Met behulp van data en systeemkennis, stimuleren we innovatie voor een betere toekomst.
+* **Doel van het Dashboard:**
+    * Dit dashboard brengt cruciale inzichten voor stadsontwikkelaars, beleidsmakers, en bedrijven die willen bijdragen aan de circulaire economie van Amsterdam.
+
+* **Verken de Data:** Ga dieper in op materiaalstromen, hergebruik kansen, en projecten op het gebied van urban mining.
+* **Meer over Metabolic:** Ontdek onze expertise en projecten op het gebied van circulariteit en duurzaamheid.
+* **Wordt Partner:** Neem contact met ons op voor samenwerkingsmogelijkheden op het gebied van urban mining.
+
+   """
+)
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/reportgenerator.py
+CODE: """ This module contains the logic to generate a PDF report from the data visualizations and tables. """
+
+from io import BytesIO
+import base64
+import streamlit as st
+import xhtml2pdf.pisa as pisa
+import plotly.io as pio
+from jinja2 import Environment, FileSystemLoader
+
+# This is necessary to render the Plotly figures as SVG images in color as streamlit defaults to B&W.
+pio.templates.default = "plotly"
+
+
+def render_html(text: str, figs_in_base64: dict) -> str:
+    """Renders the HTML template with the text and figures provided."""
+
+    figs = [
+        f"<h3>{fig_name}</h3> <img src='data:image/svg;base64,{fig_data}' alt='{fig_name}'>"
+        for fig_name, fig_data in figs_in_base64.items()
+    ]
+    figs_html = " ".join(figs)
+
+    file_loader = FileSystemLoader(
+        "resources/templates"
+    )  # Specify the directory of your templates
+    env = Environment(loader=file_loader)
+    template = env.get_template("report.html")
+
+    data = {
+        "title": "Urban Mining Potential Assessment Report",
+        "text": text,
+        "figs_html": figs_html,
+    }
+    return template.render(data)
+
+
+def transform_fig_to_base64(fig) -> str:
+    """Transforms a Plotly figure to a base64 encoded SVG image."""
+    img_bytes = BytesIO()
+    fig.write_image(img_bytes, format="svg")
+    img_base64 = base64.b64encode(img_bytes.getvalue()).decode("utf-8")
+    return img_base64
+
+
+def generate_report_pdf(text: str, figs: dict):
+    """Generates a PDF report from the text and figures provided and returns the PDF as bytes."""
+
+    figs_in_base64 = {
+        fig_name: transform_fig_to_base64(fig_data)
+        for fig_name, fig_data in figs.items()
+    }
+    html = render_html(text, figs_in_base64)
+    pdf_output = BytesIO()  # Open a file-like object in memory
+    pdf = pisa.CreatePDF(html, dest=pdf_output)
+
+    if not pdf.err:
+        pdf_bytes = pdf_output.getvalue()  # Get PDF data as bytes
+        pdf_output.close()  # Close in-memory file
+        return pdf_bytes
+    else:
+        st.error("Error generating PDF.")
+        return None
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/layout.py
+CODE: """ Contains re-usable visual components for the app."""
+import streamlit as st
+from utils import utils
+from utils import data_manager
+
+
+def set_page_title(title: str, divider: bool = True) -> None:
+    """Sets the page title and adds the Metabolic logo to the top of the page.
+    Needs to be called at the start of every page."""
+    st.set_page_config(page_title=title, layout="wide")
+    col1, col2 = st.columns((1, 5))
+
+    with col1:
+        st.image("resources/Metabolic_logo.png", width=100)
+
+    with col2:
+        st.title(title)
+
+    st.divider() if divider else None
+
+
+def save_scenario_form(to_file=False, **kwargs) -> None:
+    """Displays the form to save a scenario to the session state.
+    Input as kwargs all the variables that need to be saved with their right naming."""
+
+    with st.form("scenario_form"):
+        scenarion_name = st.text_input("Scenario name", value="Scenario 1")
+        submit_button = st.form_submit_button("Add scenarios to results page")
+        if submit_button:
+            if "scenarios" not in st.session_state:
+                st.session_state.scenarios = {}
+            data_manager.save_scenario_to_session_state(scenarion_name, kwargs)
+            st.success(f"Scenario '{scenarion_name}' saved successfully!")
+    if not to_file:
+        data_manager.save_scenario_to_file()
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/__init__.py
+CODE: 
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/column_configs.py
+CODE: """ This module contains the column configurations for the streamlit app. """
+import streamlit as st
+
+summary_df = {
+    "Percentage realized": st.column_config.ProgressColumn(
+        "Percentage realized",
+        help="Percentage van de functie dat gerealiseerd is.",
+        format="",
+        min_value=0,
+        max_value=100,
+    )
+}
+
+impact_df = {
+    "Share of total impact": st.column_config.ProgressColumn(
+        "Share of total impact",
+        help="Percentage van de totale impact van het gebouwprofiel.",
+        format="",
+        min_value=0,
+        max_value=100,
+    )
+}
+
+split_column = {
+    "value": st.column_config.NumberColumn(
+        "Value", min_value=0.0, max_value=1.0, step=0.01, required=True
+    ),
+}
+
+# Path: utils/column_configs.py
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/ai_report.py
+CODE: """ This module is responsible for generating a report based on the user's input. """
+import streamlit as st
+from openai import OpenAI
+
+# Models: "gpt-4-0125-preview", "gpt-3.5-turbo-0125"
+# Question to our report AI
+
+BASE_PROMPT = """
+    Je bent een deskundig adviseur in de gebouwde omgeving voor de stad Amsterdam. Je bent gevraagd een rapport te schrijven voor een dasboard waarin je verschillende scenario’s voor de circulaire economie vergelijkt.
+    De scenario's verschillen in: hoeveelheid m2 die wordt gebruikt voor woningen, het soort gebouwen dat wordt gebruikt en de totale impact afhankelijk van het type gebouw dat wordt gebruikt.
+    Schrijf een beknopt rapport van max 100 woorden waarin u de verschillende scenario's, de voor- en nadelen van elk scenario.
+    Gebruik feitelijke cijfers uit de tabel bij het opbouwen van uw betoog. Geef geen eindconclusie, of inleidingmaar begin meteen met de analyse
+    Dit zijn de scenariogegevens:
+    """
+
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+session = st.session_state
+
+
+def create_report_message() -> dict:
+    """
+    Create a message to send to the AI model.
+    Takes as content a default prompt and appends the data from the scenario's
+    stored in the session state.
+    """
+    role = "assistant"
+    content = BASE_PROMPT + str(session.scenarios)
+    message = {"role": role, "content": content}
+    return message
+
+
+def get_ai_report(message):
+    """Get the AI report from OpenAI's GPT-4 model based on the message."""
+    report = client.chat.completions.create(
+        model="gpt-4-0125-preview", messages=[message], stream=True
+    )
+    return report
+
+
+def produce_report(container):
+    """
+    Takes a streamlit st.empty object to write the outputs to.
+    Produce the report based on the user's input.
+    """
+    try:
+        message = create_report_message()
+        stream = get_ai_report(message)
+        if "ai_report_text" not in session:
+            text_chunks = []
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    with container:
+                        text_chunks.append(chunk.choices[0].delta.content)
+                        st.write("".join(text_chunks))
+            session["ai_report_text"] = "".join(text_chunks)  # Store the text
+
+    except Exception as exception:
+        st.error(f"An error occurred: {exception}")
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/buildingdata.py
+CODE: """ Classes to hold building profile data.
+Also holds building needs data and woning typologie data, but this may need to be moved to a different class."""
+import math
+
+
+class BuildingData:
+    def __init__(self):
+        self.needs = {}
+        self.building_profiles = {}
+        self.woning_typologie_m2 = {}
+        self.building_uses = []
+        self.editable_data = {
+            "needs": self.needs,
+            "building_profiles": self.building_profiles,
+            "woning_typologie_m2": self.woning_typologie_m2,
+        }
+        pass
+
+    def load_all_data(self):
+        self.load_bag_data()
+        self.load_needs_data()
+        self.load_building_profile_data()
+
+    def load_bag_data(self):
+        # load data from the bag.
+        pass
+
+    def load_needs_data(self):
+        """Load the needs data. This data should be put somewhere else, but for now it's here. Creates a list of building uses to use e.g. to set a column config"""
+        self.needs["dwelling_needs"] = {"Woningen": 600}
+        self.needs["other_needs"] = {
+            "Kantoren": 10000,
+            "Horeca": 5000,
+            "Utiliteits": 3000,
+        }
+        self.editable_data["needs"] = self.needs
+        self.building_uses = list(self.needs["other_needs"].keys()) + list(
+            self.needs["dwelling_needs"].keys()
+        )
+
+    def load_building_profile_data(self):
+        """Load building data. This data should be put somewhere else, but for now it's here."""
+        self.woning_typologie_m2 = {"Groot": 120, "Klein": 60, "Medium": 80}
+        self.building_profiles = {
+            "Mixed_used_toren": {
+                "split": {"Woningen": 0.6, "Kantoren": 0.3, "Horeca": 0.1},
+                "impact_m2": {"hybrid": 300, "secondary": 100, "regular": 500},
+                "min_m2": 500,
+                "description": "Een toren met een mix van woningen, kantoren en horeca.",
+            },
+            "Kantoorgebouw": {
+                "split": {"Kantoren": 1},
+                "impact_m2": {"hybrid": 100, "secondary": 200, "regular": 500},
+                "min_m2": 1000,
+                "description": "Een gebouw met alleen kantoren.",
+            },
+            "Laagbouw": {
+                "split": {"Woningen": 1},
+                "impact_m2": {"hybrid": 100, "secondary": 200, "regular": 500},
+                "min_m2": 120,
+                "description": "Een laagbouw met alleen woningen.",
+            },
+            "Multi-family": {
+                "split": {"Woningen": 1},
+                "impact_m2": {"hybrid": 60, "secondary": 30, "regular": 100},
+                "min_m2": 480,
+                "description": "Een gebouw met alleen woningen voor meerdere gezinnen",
+            },
+        }
+        self.editable_data["woning_typologie_m2"] = self.woning_typologie_m2
+        self.editable_data["building_profiles"] = self.building_profiles
+
+    def get_profile_template(self):
+        """Returns a template for a building profile"""
+        split = list(self.needs["dwelling_needs"].keys()) + list(
+            self.needs["other_needs"].keys()
+        )
+        return {
+            "split": {s: 0 for s in split},
+            "impact_m2": {"hybrid": 0, "secondary": 0, "regular": 0},
+            "min_m2": 0,
+            "description": "Beschrijf hier het gebouwprofiel.",
+        }
+
+    def update_profile_split(self, profile_name, new_value):
+        sum_new_values = sum(new_value.values())
+        if profile_name in self.building_profiles:
+            if math.isclose(sum_new_values, 1, abs_tol=0.0001):
+                self.building_profiles[profile_name]["split"] = new_value
+                return True
+            else:
+                print("error with the addion")
+                return False
+
+    def update_profile_impact(self, profile_name, new_value):
+        if profile_name in self.building_profiles:
+            self.building_profiles[profile_name]["impact_m2"] = new_value
+            return True
+        else:
+            return False
+
+    def update_profile_min_m2(self, profile_name, new_value):
+        if profile_name in self.building_profiles:
+            self.building_profiles[profile_name]["min_m2"] = new_value
+            return True
+        else:
+            return False
+
+    def add_building_profile(self, profile_name: str, profile_data: dict) -> bool:
+        """Adds a new building profile
+
+        Args:
+            profile_name: The name of the new profile
+            profile_data: A dictionary containing 'split', 'impact_m2', and 'min_m2'
+        """
+        if profile_name not in self.building_profiles:
+            if self.validate_building_profile(profile_data):  # Ensure data is valid
+                self.building_profiles[profile_name] = profile_data
+                self.editable_data["building_profiles"] = self.building_profiles
+                print("Profile added successfully")
+                print(self.building_profiles)
+                return True
+            else:
+                print("Profile not valid")
+                return False  # Indicate failure due to invalid data
+        else:
+            print("Profile name conflict")
+            return False  # Indicate failure due to profile name conflict
+
+    def update_profile_description(self, profile_name, new_value):
+        if profile_name in self.building_profiles:
+            self.building_profiles[profile_name]["description"] = new_value
+            return True
+        else:
+            return False
+
+    def validate_building_profile(self, profile_data: dict):
+        """ToDo: Validates the building profile data"""
+        return True
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/calculations.py
+CODE: """ Generation of key calculations and tables"""
+import pandas as pd
+
+
+def create_building_profile_impact_table(
+    building_profiles: dict, building_profiles_user_data: dict
+) -> pd.DataFrame:
+    """Create a table with the impact of the building profiles.
+    args:
+    Building profiles: the standard data for each profile.
+    Building_profiles_user_data: the user input for each profile.
+    Return: a pandas DataFrame with the impact of each building profiles.
+    """
+    impact_table = []
+    for profile in building_profiles_user_data.keys():
+        for secondary_type in building_profiles_user_data[profile]:
+            impact_table.append(
+                [
+                    profile,
+                    secondary_type,
+                    building_profiles_user_data[profile][secondary_type],
+                    building_profiles[profile]["impact_m2"][secondary_type]
+                    * building_profiles_user_data[profile][secondary_type],
+                ]
+            )
+    impact_df = pd.DataFrame(
+        impact_table, columns=["Gebouwprofiel", "Secondary Type", "M2", "Totale impact"]
+    )
+    # Calculate the share of the imoact of the total impact of each profile
+    impact_df["Share of total impact"] = (
+        impact_df["Totale impact"] / impact_df["Totale impact"].sum() * 100
+    )
+    return impact_df
+
+
+def create_building_profile_realisation_table(
+    building_profiles: dict,
+    building_profiles_user_data: dict,
+) -> pd.DataFrame:
+
+    """Create a table with actual realisation of gebruik fo reach of the building profiles."""
+    realistion_table = []
+    for profile, profile_data in building_profiles_user_data.items():
+        for typology, split_percentage in building_profiles[profile]["split"].items():
+            realized_m2 = split_percentage * sum(profile_data.values())
+            realistion_table.append([profile, typology, realized_m2])
+
+    return pd.DataFrame(
+        realistion_table, columns=["Gebouwprofiel", "Gebruik", "Realized m2"]
+    )
+
+
+def calculate_total_amount_of_houses_per_type(
+    m2_per_housing_type,
+    percentage_per_housing_type,
+    projected_houses,
+) -> dict:
+    """Multiplies the m2 per housing type with the percentage per housing type to get the amount of houses per housing type.
+    Returns dict with amount of housing per type"""
+    amount_of_houses = {}
+    for key, value in m2_per_housing_type.items():
+        amount_of_houses[key] = int(
+            value * projected_houses * percentage_per_housing_type[key] / 100
+        )
+    return amount_of_houses
+
+
+def summarize_realisation_table(
+    realistion_df: pd.DataFrame,
+    other_needs_m2: dict,
+    dwelling_needs_m2: dict,
+) -> pd.DataFrame:
+    """
+    Summarizes the realisation_table based on the 'Gebruik' column.
+    Returns: a pandas DataFrame with the summarized realisation_table.
+    """
+    summary_df = pd.DataFrame(
+        realistion_df.groupby("Gebruik")["Realized m2"].sum()
+    ).reset_index()
+    other_needs_m2.update(dwelling_needs_m2)
+    summary_df["Needed m2"] = summary_df["Gebruik"].map(other_needs_m2)
+    summary_df["Realized m2"] = summary_df["Realized m2"].astype(int)
+    summary_df["Percentage realized"] = (
+        summary_df["Realized m2"] / summary_df["Needed m2"] * 100
+    )
+    return summary_df
+
+
+def create_mfa_data() -> dict:
+    """Create a dict for the MFA data for the building profile. For now with dummy data"""
+    mfa_data = {
+        "source": [
+            "Apartment",
+            "Apartment",
+            "Apartment",
+            "Apartment",
+            "Office",
+            "Office",
+            "Office",
+            "Low-Rise",
+            "Low-Rise",
+            "Low-Rise",
+        ],
+        "target": [
+            "Brick",
+            "Wood",
+            "Steel",
+            "Stone",
+            "Brick",
+            "Steel",
+            "Concrete",
+            "Wood",
+            "Steel",
+            "Stone",
+        ],
+        "Value": [250, 100, 50, 25, 300, 200, 150, 150, 100, 75],
+    }
+
+    return mfa_data
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/utils.py
+CODE: """ This file contains the utility functions for creating maps and visual elements """
+
+from copy import deepcopy
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import streamlit as st
+from streamlit_folium import st_folium
+import plotly.graph_objects as go
+import plotly.express as px
+import folium
+
+session = st.session_state
+
+LOCATION = (52.309033724116524, 4.967533318175478)
+ZOOM_START = 13
+TILES = "Cartodb Positron"
+POPUP_FIELDS = ["fuuid", "bouwjaar", "gebruiksdo", "sloop", "transform"]
+FILE_LOCATION = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
+
+
+def display_dummy_sankey(data) -> go.Figure:
+    """Create a dummy sankey plot, just to test the layout and interactivity"""
+
+    df = pd.DataFrame(data)
+    all_nodes = list(set(df["source"]).union(set(df["target"])))
+    node_dict = {node: i for i, node in enumerate(all_nodes)}
+
+    # Map the source and target to their respective indices
+    df["source_id"] = df["source"].map(node_dict)
+    df["target_id"] = df["target"].map(node_dict)
+
+    # Create Sankey diagram
+    fig = go.Figure(
+        data=[
+            go.Sankey(
+                node=dict(
+                    pad=15,
+                    thickness=20,
+                    line={"color": "black", "width": 0.5},
+                    label=all_nodes,
+                ),
+                link=dict(
+                    source=df["source_id"],
+                    target=df["target_id"],
+                    value=df["Value"],
+                    color=["#f0f0f0"] * len(df),  # Very light grey hex code
+                ),
+            )
+        ]
+    )
+
+    return fig
+
+
+@st.cache_data(experimental_allow_widgets=True)
+def create_map(_gdf_bag, _gdf_bag_no_geom) -> folium.Map:
+    """Create a map with the BAG data, color the buildings based on the 'transform' column"""
+
+    # Create a new GeoDataFrame with updated 'transform' and 'sloop' columns
+    _gdf_bag["transform"] = _gdf_bag_no_geom["transform"]
+    _gdf_bag["sloop"] = _gdf_bag_no_geom["sloop"]
+
+    def style_function(feature):
+        transform_value = feature["properties"]["transform"]
+        if transform_value:  # If 'transform' is True
+            return {
+                "fillColor": "#FF0000",
+                "color": "#0000FF",
+            }  # Red (or your chosen color)
+
+        return {
+            "fillColor": "#0000FF",
+            "color": "#FF0000",
+        }  # Blue (or your chosen color)
+
+    m = folium.Map(location=LOCATION, zoom_start=ZOOM_START, tiles=TILES)
+    folium.GeoJson(
+        _gdf_bag,
+        style_function=style_function,
+        popup=folium.GeoJsonPopup(
+            fields=POPUP_FIELDS,
+        ),
+    ).add_to(m)
+
+    return st_folium(m, use_container_width=True)
+
+
+def create_project_map(_gdf_bag) -> folium.Map:
+    """Create a map with the BAG data, color the buildings based on the 'transform' column"""
+
+    # Create a new GeoDataFrame with updated 'transform' and 'sloop' columns
+
+    def style_function(feature):
+        """Style function for the GeoJson layer"""
+        transform_value = feature["properties"]["transform"]
+        if transform_value:  # If 'transform' is True
+            return {
+                "fillColor": "#FF0000",
+                "color": "#0000FF",
+            }  # Red (or your chosen color)
+
+        return {
+            "fillColor": "#0000FF",
+            "color": "#FF0000",
+        }  # Blue (or your chosen color)
+
+    m = folium.Map(location=LOCATION, zoom_start=ZOOM_START, tiles=TILES)
+    folium.GeoJson(
+        _gdf_bag,
+        style_function=style_function,
+        popup=folium.GeoJsonPopup(
+            fields=POPUP_FIELDS,
+        ),
+    ).add_to(m)
+
+    return st_folium(m, use_container_width=True)
+
+
+def display_project_shape_diagram(coords) -> plt.Figure:
+    """Display the shape of the selected project"""
+    x_coords = [point[0] for point in coords[0]]
+    y_coords = [point[1] for point in coords[0]]
+
+    # Close the polygon (Matplotlib expects the first and last points to be the same)
+    x_coords.append(x_coords[0])
+    y_coords.append(y_coords[0])
+
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(1, 1))  # Set smaller figure size
+    ax.plot(x_coords, y_coords, color="red")
+
+    # Remove labels and axes
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+    ax.set_xticks([])  # Remove x ticks
+    ax.set_yticks([])  # Remove y ticks
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    # Display in Streamlit
+    st.pyplot(fig, use_container_width=False)
+
+
+def display_project_data(df, selected_point_id, coords):
+    """Display the data of the selected project"""
+
+    data = df.loc[df["fuuid"] == selected_point_id]
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.title(selected_point_id[0:8])
+        st.write("Bouwjaar:", int(data.iloc[0]["bouwjaar"]))
+        st.write("Gebruiksdoel:", data.iloc[0]["gebruiksdo"])
+        sloop = st.selectbox("Sloop", [True, False], index=0)
+        transform = st.selectbox("Transform", [True, False], index=0)
+        project_type = st.selectbox("Project type", ["Biobased", "Regulier"], index=0)
+        button = st.button("Save changes")
+        if button:
+            st.success("Changes saved")
+
+    with col2:
+        display_project_shape_diagram(coords)
+
+
+def create_scenario_comparison():
+    """Compares scenarios and returns a bar chart."""
+    scenario_dfs = {}
+    for key, value in session.scenarios.items():
+        scenario_dfs[key] = pd.DataFrame(value["building_profiles"])
+
+    combined_df = pd.concat(scenario_dfs.values(), keys=scenario_dfs.keys())
+    combined_df.reset_index(level=0, inplace=True)
+    melted_df = combined_df.melt(
+        id_vars="level_0", var_name="Gebouwprofiel", value_name="Totale impact"
+    )
+    melted_df.rename(columns={"level_0": "Scenario"}, inplace=True)
+
+    fig = px.bar(
+        melted_df,
+        x="Scenario",
+        y="Totale impact",
+        # Or use y="Normalized Share" if you calculated relative shares
+        color="Gebouwprofiel",
+        barmode="stack",  # Create stacked bars
+        title="Stacked Bar Chart of Gebouwprofiel Impact Across Scenarios",
+    )
+    return fig
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/utils/data_manager.py
+CODE: """ Handles the loading and saving of spatial data and scenarios in the session state.
+Needs to be imported in all pages that use spatial data or scenarios."""
+
+import pickle
+from copy import deepcopy
+import geopandas as gpd
+import pandas as pd
+import numpy as np
+import streamlit as st
+
+session = st.session_state
+FILE_LOCATION = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
+
+
+def load_bag_data():
+    """
+    Load the BAG data and create a dummy column for the transformation and demolition of buildings.
+    Saves data in the session state variable as geometry_bag and gdf_bag
+    """
+    if "gdf_bag" in session:
+        return True
+
+    try:
+        with st.spinner("Loading spatial data in session"):
+            gdf_bag = gpd.read_file(FILE_LOCATION)
+            gdf_bag = gdf_bag.sample(n=200).reset_index(drop=True)
+            gdf_bag["sloop"] = True
+            gdf_bag["transform"] = False
+            # create some random categories for the buildings.
+            gdf_bag["use"] = np.random.choice(
+                ["Apartment", "Office", "Low-Rise"], size=len(gdf_bag)
+            )
+            session.geometry_bag = gdf_bag
+            session.gdf_bag = gdf_bag.drop(columns="geometry")
+            return True
+
+    except FileNotFoundError:
+        st.error("No spatial data found")
+        return False
+
+
+def load_scenario_from_file():
+    """
+    Load the data from a pickle assign it as a dictionary to the session state variable.
+    Only execute this function if the session state variable does not contain a key called "scenarios"
+    """
+    if not "scenarios" in session:
+        try:
+            with open("scenarios/scenario_data.pickle", "rb") as f:
+                loaded_data = pickle.load(f)
+                session.scenarios = loaded_data
+        except FileNotFoundError:
+            st.write("No scenarios found")
+
+
+def load_first_scenario():
+    """Load the first scenario from the session state variable"""
+
+    if "scenarios" in session and len(session.scenarios):
+        session.building_profile = session.scenarios[list(session.scenarios.keys())[0]][
+            "building_profiles"
+        ]
+        session.building_size_slider = session.scenarios[
+            list(session.scenarios.keys())[0]
+        ]["woning_typologie_m2"]
+        print("Loaded first scenario from file")
+    else:
+        print("No scenario found")
+
+
+def save_scenario_to_file():
+    """Save the data from the session state variable to a pickle file"""
+    with open("scenarios/scenario_data.pickle", "wb") as f:
+        pickle.dump(session.scenarios, f)
+
+
+def save_scenario_to_session_state(scenario_name, data_to_save: dict):
+    """Save the data that we want to keep for the current scenario to the scenario's session state variable"""
+    session.scenarios[scenario_name] = {}
+    for attribute, value in data_to_save.items():
+        session.scenarios[scenario_name][attribute] = deepcopy(value)
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/pages/2_2 - Nieuwbouw.py
+CODE: """
+This page is used to set the mix of building types to be used in a scenario.
+It saves the scenario to the session state and to a file.
+"""
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+from utils.buildingdata import BuildingData
+from utils import layout
+from utils import data_manager
+from utils import calculations as calc
+from utils import utils
+from utils import column_configs
+
+layout.set_page_title("Keuze nieuwbouw")
+session = st.session_state
+
+data_manager.load_scenario_from_file()
+data_manager.load_first_scenario()
+
+if "BuildingData" not in session:
+    session.BuildingData = BuildingData()
+    session.BuildingData.load_all_data()
+BuildingData = session.BuildingData
+
+st.write("Here a lot of text describing what you need to do here.")
+
+tabs1, tabs2 = st.tabs(["Woningtypologie", "Gebouwprofielen"])
+if "building_size_slider" not in session:
+    session.building_size_slider = {}
+    for key in BuildingData.woning_typologie_m2.keys():
+        session.building_size_slider[key] = 33
+
+# Selection of mix of living sizes.
+with tabs2:
+    col1, col2, col3 = st.columns((3, 1, 3))
+    with col1:
+        st.write("Kies percentage per woningtypologie.")
+        session.building_size_slider = {
+            w: st.slider(
+                key=w,
+                min_value=0,
+                max_value=100,
+                label=w,
+                value=session.building_size_slider.get(w, 33),
+            )
+            for w in BuildingData.woning_typologie_m2.keys()
+        }
+        totaal = sum(session.building_size_slider.values())
+        if (totaal) > 100:
+            st.warning(f"Totaal percentage: {totaal}% is groter dan 100%.")
+        else:
+            st.success(f"Totaal percentage: {totaal}%")
+    with col3:
+        m2_totaal = list(session.building_size_slider.values()) * np.array(
+            list(BuildingData.woning_typologie_m2.values())
+        )
+        chart_data = pd.DataFrame(
+            ((m2_totaal),), columns=session.building_size_slider.keys()
+        )
+        st.write("M2 per woningtypologie")
+        st.bar_chart(chart_data)
+
+    # Generate metrics of the projected needs
+    housing_needs_m2 = calc.calculate_total_amount_of_houses_per_type(
+        BuildingData.woning_typologie_m2,
+        session.building_size_slider,
+        BuildingData.needs["dwelling_needs"]["Woningen"],
+    )
+    # Generating the building profile sliders
+
+with tabs1:
+    if "building_profile" not in session:
+        session.building_profile = {}
+
+    col1, col2, col3 = st.columns((1, 1, 1))
+
+    building_type_labels = list(BuildingData.building_profiles.keys())
+    secondary_type_labels = unique_impact_keys = {
+        key
+        for profile in BuildingData.building_profiles.values()
+        for key in profile["impact_m2"].keys()
+    }
+
+    building_type = col2.selectbox("Gebouwtype", building_type_labels)
+    secondary_type = col3.selectbox("Profiel", secondary_type_labels)
+
+    if col1.button("Voeg gebouw toe"):
+        if building_type not in session.building_profile:
+            session.building_profile[building_type] = {}
+        session.building_profile[building_type][
+            secondary_type
+        ] = session.building_profile[building_type].get(secondary_type, 0)
+
+    # Generating the building profile sliders and storing them in the session state
+    def update_slider_value(profile, secondary_type, key):
+        session.building_profile[profile][secondary_type] = session[key]
+
+    col1, col2 = st.columns((1, 2))
+    for profile in session.building_profile.keys():
+        for secondary_type in session.building_profile[profile]:
+            key = f"{profile}+{secondary_type}"
+            min_value = BuildingData.building_profiles[profile]["min_m2"]
+            with col1:
+                st.slider(
+                    key=key,
+                    min_value=min_value,
+                    max_value=min_value * 100,
+                    label=f"{profile} -> {secondary_type}",
+                    value=session.building_profile.get(profile, {}).get(
+                        secondary_type, min_value
+                    ),
+                    on_change=update_slider_value,
+                    args=(profile, secondary_type, key),
+                )
+
+impact_df = calc.create_building_profile_impact_table(
+    BuildingData.building_profiles, session.building_profile
+)
+realisation_df = calc.create_building_profile_realisation_table(
+    BuildingData.building_profiles,
+    session.building_profile,
+)
+summary_df = calc.summarize_realisation_table(
+    realisation_df,
+    BuildingData.needs["other_needs"],
+    {"Woningen": sum(housing_needs_m2.values())},
+)
+
+col2.dataframe(
+    summary_df,
+    use_container_width=True,
+    hide_index=True,
+    column_config=column_configs.summary_df,
+)
+col2.dataframe(
+    impact_df,
+    use_container_width=True,
+    hide_index=True,
+    column_config=column_configs.impact_df,
+)
+col2.dataframe(realisation_df, use_container_width=True, hide_index=True)
+
+st.markdown("##")
+layout.save_scenario_form(
+    to_file=False,
+    building_profiles=session.building_profile,
+    woning_typologie_m2=session.building_size_slider,
+    impact_df=impact_df,
+    realisation_df=realisation_df,
+    summary_df=summary_df,
+)
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/pages/1_1 - Sloop en transformatie.py
+CODE: """
+In this page you can view the data of the BAG dataset and change the transform and sloop columns,
+both through a table and with a randomizer button.
+It takes a randoms sample from the BAG dataset and initializes some random default dummy values, such as gebruik.
+"""
+
+import numpy as np
+import pandas as pd
+import streamlit as st
+from utils import utils
+from utils import layout
+from utils import data_manager
+from utils import calculations as calc
+
+session = st.session_state
+layout.set_page_title("Sloop en nieuwbouw")
+data_manager.load_bag_data()
+
+
+def update_data():
+    """Check this out for the data editor: https://github.com/streamlit/streamlit/issues/7749#issuecomment-1910188358"""
+    for idx, change in session.changes["edited_rows"].items():
+        for label, value in change.items():
+            session.gdf_bag.loc[idx, label] = value
+
+
+col1, col2 = st.columns(2)
+with col1:
+    st_data = utils.create_map(session.geometry_bag, session.gdf_bag)
+
+with col2:
+    st.data_editor(
+        session.gdf_bag,
+        key="changes",
+        on_change=update_data,
+        column_order=[
+            "sloop",
+            "transform",
+            "use",
+            "oppervlakt",
+            "buurt_naam",
+            "bouwjaar",
+        ],
+        height=500,
+    )
+    col3, col4 = st.columns(2)
+
+    with col3:
+
+        def refresh_map():
+            """Clear the cache of the map to force a refresh."""
+            utils.create_map.clear()
+
+        st.button("Refresh map", on_click=refresh_map)
+        # We can do load the selected point here if necessary.
+
+    with col4:
+        st.write("Transform a percentage of all offices, picked at random")
+        transform_slider = st.slider(
+            "Percentage of transformed offices", 0, 100, 50, 10
+        )
+
+        def update_office_button():
+            """necessary evil function to update the data in the dataframe."""
+            session.gdf_bag.loc[
+                session.gdf_bag["use"] == "Office", "transform"
+            ] = np.random.choice(
+                [True, False],
+                size=len(session.gdf_bag[session.gdf_bag["use"] == "Office"]),
+                p=[transform_slider / 100, 1 - transform_slider / 100],
+            )
+            utils.create_map.clear()
+
+        st.button("Transform random office buildings", on_click=update_office_button)
+
+st.divider()
+st.title("Results")
+
+col1, col2 = st.columns(2)
+with col1:
+    cola, colb, colc = st.columns(3)
+
+    st.write(
+        "Here's some dummy text for the results of the analysis. We can add more metrics and visualizations as needed."
+    )
+    with cola:
+        st.metric("Herbestemde kantoren", session.gdf_bag["transform"].sum())
+    with colb:
+        st.metric("Gesloopte gebouwen", session.gdf_bag["sloop"].sum())
+    with colc:
+        st.metric(
+            "Behouden woningen",
+            session.gdf_bag.shape[0] - session.gdf_bag["sloop"].sum(),
+        )
+with col2:
+    mfa_data = calc.create_mfa_data()
+    fig = utils.display_dummy_sankey(mfa_data)
+    st.plotly_chart(fig)
+
+print("Ran at: ", pd.Timestamp.now())
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/pages/4_4 - Resultaten.py
+CODE: # todo
+# add scenario loading and load first scenario.
+# Report download button / layout.
+
+import streamlit as st
+from utils import utils
+from utils import layout
+from utils import data_manager
+import utils.column_configs as column_configs
+from utils.ai_report import produce_report
+from utils.reportgenerator import generate_report_pdf
+
+
+layout.set_page_title("Resultaten")
+data_manager.load_scenario_from_file()
+session = st.session_state
+
+if "scenarios" in session and len(session.scenarios):
+    tabs = st.tabs(["Comparison"] + list(session.scenarios.keys()))
+    to_delete = []
+
+    with tabs[0]:
+        col1, col2 = st.columns((1, 2))
+        comparison_fig = utils.create_scenario_comparison()
+        with col1:
+            container = st.empty()
+
+            if "ai_report_text" not in session:
+                st.button(
+                    "Create AI-generated report (experimental)",
+                    on_click=produce_report,
+                    args=(container,),
+                )
+            else:
+                st.write(session["ai_report_text"])
+
+                with st.spinner("Generating report..."):
+                    pdf_bytes = generate_report_pdf(
+                        session["ai_report_text"], {"comparison": comparison_fig}
+                    )
+                    st.download_button(
+                        label="Download report",
+                        data=pdf_bytes,
+                        file_name="report.pdf",
+                        mime="application/pdf",
+                    )
+
+        with col2:
+            st.plotly_chart(comparison_fig)
+
+    for i, (scenario, scenario_data) in enumerate(session.scenarios.items()):
+        with tabs[i + 1]:
+            st.dataframe(
+                scenario_data["impact_df"], column_config=column_configs.impact_df
+            )
+            st.dataframe(
+                scenario_data["summary_df"], column_config=column_configs.summary_df
+            )
+            if st.button("Remove scenario", key=f"remove_{scenario}"):
+                to_delete.append(scenario)
+
+    for scenario in to_delete:
+        del session.scenarios[scenario]
+        # utils.save_scenario_to_file()
+        st.success(f"Scenario '{scenario}' removed from file.")
+        st.rerun()
+else:
+    st.write("No scenarios found")
+
+st.divider()
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/pages/5_5 - Update gebouwprofielen.py
+CODE: """ Interface page to edit the building profiles and saving them to the session state.
+ToDo: save this to a file and load it from a file"""
+
+import pandas as pd
+import streamlit as st
+from utils.buildingdata import BuildingData
+from utils.layout import set_page_title
+from utils.column_configs import split_column
+
+print("rerun at time: ", pd.Timestamp.now())
+set_page_title("Edit building profiles")
+session = st.session_state
+
+if "BuildingData" not in session:
+    session.BuildingData = BuildingData()
+    session.BuildingData.load_all_data()
+BuildingData = session.BuildingData
+
+
+def app():
+    """Interface for editing the building profiles. Wrapped in an app function because of the helper functions"""
+
+    editable_data = st.selectbox(
+        "Select data to edit",
+        options=BuildingData.editable_data.keys(),
+        index=1,
+    )
+
+    if editable_data == "building_profiles":
+        for profile, profile_data in BuildingData.editable_data[editable_data].items():
+            edit_existing_profile(profile, profile_data)
+        st.text_input(
+            "Add new profile", key="new_profile_name", on_change=add_new_profile
+        )
+
+    else:
+        st.write(editable_data)
+        st.dataframe(BuildingData.editable_data[editable_data])
+
+    st.write("DEBUG INFO")
+    st.write(BuildingData.building_profiles)
+
+
+def edit_existing_profile(profile, profile_data):
+    # Add a data editor for the profile data
+
+    with st.expander(profile):
+        col1, col2, col3, col4 = st.columns(4)
+
+        description = col1.text_area(
+            "Description",
+            value=profile_data["description"],
+            key=f"{profile}_description",
+        )
+        impact_m2 = col2.data_editor(
+            profile_data["impact_m2"], key=f"{profile}_impact_m2", num_rows="dynamic"
+        )
+        split = col3.data_editor(
+            profile_data["split"], key=f"{profile}_split", column_config=split_column
+        )
+        min_m2 = col4.number_input(
+            "Minimum m2", value=profile_data["min_m2"], key=f"{profile}_min_m2"
+        )
+
+        BuildingData.update_profile_impact(profile, impact_m2)
+        BuildingData.update_profile_min_m2(profile, min_m2)
+        BuildingData.update_profile_description(profile, description)
+        if not BuildingData.update_profile_split(profile, split):
+            col3.error(f"Splits don't add up to 1")
+
+
+def add_new_profile():
+    # Collect new profile information from the user (e.g., using text inputss{}
+    new_profile_data = BuildingData.get_profile_template()
+    BuildingData.add_building_profile(session.new_profile_name, new_profile_data)
+
+
+if __name__ == "__main__":
+    app()
+
+----------------
+FILE: /Users/ivanthung/code/mock_up_umdashboard/pages/3_3 - Bekijk project.py
+CODE: """
+This page allows you to select individual projects and vies their state.
+It does not yet allow you to update the state, even though buttons are present.
+"""
+
+import streamlit as st
+from utils import utils
+from utils import layout
+from utils import data_manager
+
+session = st.session_state
+layout.set_page_title("Pas project aan")
+data_manager.load_bag_data()
+
+col1, col2 = st.columns(2)
+with col1:
+    interaction_data = utils.create_project_map(session.geometry_bag)
+
+with col2:
+    try:
+        selected_point_id = (
+            interaction_data.get("last_active_drawing", {})
+            .get("properties", {})
+            .get("fuuid")
+        )
+        coords = (
+            interaction_data.get("last_active_drawing", {})
+            .get("geometry", {})
+            .get("coordinates")
+        )
+        utils.display_project_data(
+            df=session.gdf_bag, selected_point_id=selected_point_id, coords=coords
+        )
+    except AttributeError:
+        st.write("Please select a project on the map")
+
+----------------
