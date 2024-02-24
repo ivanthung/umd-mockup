@@ -3,15 +3,16 @@
 # Report download button / layout.
 
 import streamlit as st
-import utils.utils as utils
-import utils.layout as layout
+from utils import utils
+from utils import layout
+from utils import data_manager
 import utils.column_configs as column_configs
-from utils.aireport import produce_report
+from utils.ai_report import produce_report
 from utils.reportgenerator import generate_report_pdf
 
 
 layout.set_page_title("Resultaten")
-utils.load_scenario_from_file()
+data_manager.load_scenario_from_file()
 session = st.session_state
 
 if "scenarios" in session and len(session.scenarios):

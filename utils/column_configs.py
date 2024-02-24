@@ -1,3 +1,4 @@
+""" This module contains the column configurations for the streamlit app. """
 import streamlit as st
 
 summary_df = {

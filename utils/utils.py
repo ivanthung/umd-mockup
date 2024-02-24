@@ -1,18 +1,18 @@
-""" This file contains the utility functions for the BAG data and the scenario's. """
+""" This file contains the utility functions for creating maps and visual elements """
 
-import pickle
 from copy import deepcopy
-import geopandas as gpd
+import numpy as np
 import pandas as pd
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import streamlit as st
+from streamlit_folium import st_folium
 import plotly.graph_objects as go
 import plotly.express as px
-import numpy as np
 import folium
-from streamlit_folium import st_folium
-import streamlit as st
-import matplotlib.pyplot as plt
 
 session = st.session_state
+
 LOCATION = (52.309033724116524, 4.967533318175478)
 ZOOM_START = 13
 TILES = "Cartodb Positron"
@@ -20,80 +20,16 @@ POPUP_FIELDS = ["fuuid", "bouwjaar", "gebruiksdo", "sloop", "transform"]
 FILE_LOCATION = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
 
 
-def load_data() -> gpd.GeoDataFrame:
-    """
-    Load the BAG data and create a dummy column for the transformation and demolition of buildings.
-    Should probable be placed in a different file.
-    """
-
-    gdf_bag = gpd.read_file(FILE_LOCATION)
-    gdf_bag = gdf_bag.sample(n=200).reset_index(drop=True)
-    gdf_bag["sloop"] = True
-    gdf_bag["transform"] = False
-    # create some random categories for the buildings.
-    gdf_bag["use"] = np.random.choice(
-        ["Apartment", "Office", "Low-Rise"], size=len(gdf_bag)
-    )
-    return gdf_bag
-
-
-def load_scenario_from_file():
-    """Load the data from a pickle assign it as a dictionary to the session state variable"""
-    if not "scenarios" in session:
-        try:
-            with open("scenarios/scenario_data.pickle", "rb") as f:
-                loaded_data = pickle.load(f)
-                session.scenarios = loaded_data
-        except FileNotFoundError:
-            st.write("No scenarios found")
-
-
-def load_first_scenario():
-    """Load the first scenario from the session state variable"""
-
-    if "scenarios" in session and len(session.scenarios):
-        session.building_profile = session.scenarios[list(session.scenarios.keys())[0]][
-            "building_profiles"
-        ]
-        session.building_size_slider = session.scenarios[
-            list(session.scenarios.keys())[0]
-        ]["woning_typologie_m2"]
-        print("Loaded first scenario from file")
-    else:
-        print("No scenario found")
-
-
-def save_scenario_to_file():
-    """Save the data from the session state variable to a pickle file"""
-    with open("scenarios/scenario_data.pickle", "wb") as f:
-        pickle.dump(session.scenarios, f)
-
-
-def save_scenario_to_session_state(scenario_name, data_to_save: dict):
-    """Save the data that we want to keep for the current scenario to the scenario's session state variable"""
-    session.scenarios[scenario_name] = {}
-    for attribute, value in data_to_save.items():
-        session.scenarios[scenario_name][attribute] = deepcopy(value)
-
-
-def display_dummy_sankey(gdf_bag, data) -> go.Figure:
+def display_dummy_sankey(data) -> go.Figure:
     """Create a dummy sankey plot, just to test the layout and interactivity"""
 
     df = pd.DataFrame(data)
-
-    for s in df["source"].unique():
-        df.loc[df["source"] == s, "Value"] = df.loc[df["source"] == s, "Value"] * len(
-            gdf_bag[gdf_bag["use"] == s]
-        )
-
     all_nodes = list(set(df["source"]).union(set(df["target"])))
     node_dict = {node: i for i, node in enumerate(all_nodes)}
 
     # Map the source and target to their respective indices
     df["source_id"] = df["source"].map(node_dict)
     df["target_id"] = df["target"].map(node_dict)
-
-    # Calculate node values (assuming values represent incoming flow)
 
     # Create Sankey diagram
     fig = go.Figure(

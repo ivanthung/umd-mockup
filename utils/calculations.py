@@ -1,4 +1,4 @@
-""" All key calculations and tables"""
+""" Generation of key calculations and tables"""
 import pandas as pd
 
 
@@ -84,3 +84,36 @@ def summarize_realisation_table(
         summary_df["Realized m2"] / summary_df["Needed m2"] * 100
     )
     return summary_df
+
+
+def create_mfa_data() -> dict:
+    """Create a dict for the MFA data for the building profile. For now with dummy data"""
+    mfa_data = {
+        "source": [
+            "Apartment",
+            "Apartment",
+            "Apartment",
+            "Apartment",
+            "Office",
+            "Office",
+            "Office",
+            "Low-Rise",
+            "Low-Rise",
+            "Low-Rise",
+        ],
+        "target": [
+            "Brick",
+            "Wood",
+            "Steel",
+            "Stone",
+            "Brick",
+            "Steel",
+            "Concrete",
+            "Wood",
+            "Steel",
+            "Stone",
+        ],
+        "Value": [250, 100, 50, 25, 300, 200, 150, 150, 100, 75],
+    }
+
+    return mfa_data

@@ -1,26 +1,28 @@
-# Realiseren via gebouwprofielen.
-# Todo: add logic to load data so that I don't have to do that everytime...
+"""
+This page is used to set the mix of building types to be used in a scenario.
+It saves the scenario to the session state and to a file.
+"""
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 from utils.buildingdata import BuildingData
-import utils.layout as layout
-import utils.calculations as calc
-import utils.utils as utils
-import utils.column_configs as column_configs
-import plotly.express as px
+from utils import layout
+from utils import data_manager
+from utils import calculations as calc
+from utils import utils
+from utils import column_configs
 
 layout.set_page_title("Keuze nieuwbouw")
 session = st.session_state
-utils.load_scenario_from_file()
-utils.load_first_scenario()
+
+data_manager.load_scenario_from_file()
+data_manager.load_first_scenario()
 
 if "BuildingData" not in session:
-    BuildingData = BuildingData()
-    BuildingData.load_all_data()
-else:
-    BuildingData = session.BuildingData
+    session.BuildingData = BuildingData()
+    session.BuildingData.load_all_data()
+BuildingData = session.BuildingData
 
 st.write("Here a lot of text describing what you need to do here.")
 
@@ -50,7 +52,6 @@ with tabs2:
             st.warning(f"Totaal percentage: {totaal}% is groter dan 100%.")
         else:
             st.success(f"Totaal percentage: {totaal}%")
-
     with col3:
         m2_totaal = list(session.building_size_slider.values()) * np.array(
             list(BuildingData.woning_typologie_m2.values())
@@ -75,15 +76,15 @@ with tabs1:
 
     col1, col2, col3 = st.columns((1, 1, 1))
 
-    bu_ty = list(BuildingData.building_profiles.keys())
-    se_ty = unique_impact_keys = {
+    building_type_labels = list(BuildingData.building_profiles.keys())
+    secondary_type_labels = unique_impact_keys = {
         key
         for profile in BuildingData.building_profiles.values()
         for key in profile["impact_m2"].keys()
     }
 
-    building_type = col2.selectbox("Gebouwtype", bu_ty)
-    secondary_type = col3.selectbox("Profiel", se_ty)
+    building_type = col2.selectbox("Gebouwtype", building_type_labels)
+    secondary_type = col3.selectbox("Profiel", secondary_type_labels)
 
     if col1.button("Voeg gebouw toe"):
         if building_type not in session.building_profile:

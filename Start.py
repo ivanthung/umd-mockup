@@ -1,15 +1,14 @@
+""" Starting page for the Streamlit app"""
+
 import streamlit as st
-import utils.utils as utils
-import utils.layout as layout
+from utils import data_manager
+from utils import layout
 from streamlit_extras.app_logo import add_logo
 
 session = st.session_state
-if "gdf_bag" not in session:
-    gdf_bag = utils.load_data()
-    session.geometry_bag = gdf_bag
-    session.gdf_bag = gdf_bag.drop(columns="geometry")
-
 layout.set_page_title("About")
+data_manager.load_bag_data()
+
 st.markdown(
     """
     Boilerplate dummy text:

@@ -1,49 +1,21 @@
-import streamlit as st
-import pandas as pd
-import utils.utils as utils
-import utils.layout as layout
+"""
+In this page you can view the data of the BAG dataset and change the transform and sloop columns,
+both through a table and with a randomizer button.
+It takes a randoms sample from the BAG dataset and initializes some random default dummy values, such as gebruik.
+"""
+
 import numpy as np
+import pandas as pd
+import streamlit as st
+from utils import utils
+from utils import layout
+from utils import data_manager
+from utils import calculations as calc
 
-# Cartography settings
-
-bag_columns = [
-    "sloop",
-    "transform",
-    "use",
-    "oppervlakt",
-    "buurt_naam",
-    "bouwjaar",
-]
-mfa_data = {
-    "source": [
-        "Apartment",
-        "Apartment",
-        "Apartment",
-        "Apartment",
-        "Office",
-        "Office",
-        "Office",
-        "Low-Rise",
-        "Low-Rise",
-        "Low-Rise",
-    ],
-    "target": [
-        "Brick",
-        "Wood",
-        "Steel",
-        "Stone",
-        "Brick",
-        "Steel",
-        "Concrete",
-        "Wood",
-        "Steel",
-        "Stone",
-    ],
-    "Value": [250, 100, 50, 25, 300, 200, 150, 150, 100, 75],
-}
-
-layout.set_page_title("Sloop en nieuwbouw")
 session = st.session_state
+layout.set_page_title("Sloop en nieuwbouw")
+data_manager.load_bag_data()
+
 
 def update_data():
     """Check this out for the data editor: https://github.com/streamlit/streamlit/issues/7749#issuecomment-1910188358"""
@@ -61,7 +33,14 @@ with col2:
         session.gdf_bag,
         key="changes",
         on_change=update_data,
-        column_order=bag_columns,
+        column_order=[
+            "sloop",
+            "transform",
+            "use",
+            "oppervlakt",
+            "buurt_naam",
+            "bouwjaar",
+        ],
         height=500,
     )
     col3, col4 = st.columns(2)
@@ -69,6 +48,7 @@ with col2:
     with col3:
 
         def refresh_map():
+            """Clear the cache of the map to force a refresh."""
             utils.create_map.clear()
 
         st.button("Refresh map", on_click=refresh_map)
@@ -91,9 +71,7 @@ with col2:
             )
             utils.create_map.clear()
 
-        st.button(
-            "Transform random office buildings", on_click=update_office_button
-        )
+        st.button("Transform random office buildings", on_click=update_office_button)
 
 st.divider()
 st.title("Results")
@@ -101,7 +79,7 @@ st.title("Results")
 col1, col2 = st.columns(2)
 with col1:
     cola, colb, colc = st.columns(3)
-    
+
     st.write(
         "Here's some dummy text for the results of the analysis. We can add more metrics and visualizations as needed."
     )
@@ -114,9 +92,9 @@ with col1:
             "Behouden woningen",
             session.gdf_bag.shape[0] - session.gdf_bag["sloop"].sum(),
         )
-
 with col2:
-    fig = utils.display_dummy_sankey(session.gdf_bag , mfa_data)
+    mfa_data = calc.create_mfa_data()
+    fig = utils.display_dummy_sankey(mfa_data)
     st.plotly_chart(fig)
 
 print("Ran at: ", pd.Timestamp.now())
