@@ -28,3 +28,5 @@ with col2:
         utils.display_project_data(df = session.gdf_bag, selected_point_id= selected_point_id, coords=coords)
     except:
         st.write("Please select a project on the map")
+
+        

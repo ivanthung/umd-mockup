@@ -4,6 +4,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from utils.buildingdata import BuildingData
 import utils.layout as layout
 import utils.calculations as calc
 import utils.utils as utils
@@ -12,43 +13,21 @@ import plotly.express as px
 
 layout.set_page_title("Keuze nieuwbouw")
 session = st.session_state
-
 utils.load_scenario_from_file()
 utils.load_first_scenario()
 
-st.write("Here a lot of text describing what you need to do here.")
+if "BuildingData" not in session:
+    BuildingData = BuildingData()
+    BuildingData.load_all_data()
+else:
+    BuildingData = session.BuildingData
 
-# Invoerdata
-dwelling_needs_projection = {"Woningen": 600}
-other_needs_m2 = {"Kantoren": 10000, "Horeca": 5000, "Utiliteits": 3000}
-woning_typologie_m2 = {"Groot": 120, "Klein": 60, "Medium": 80}
-building_profiles = {
-    "Mixed_used_toren": {
-        "split": {"Woningen": 0.6, "Kantoren": 0.3, "Horeca": 0.1},
-        "impact_m2": {"hybrid": 300, "secondary": 100, "regular": 500},
-        "min_m2": 500,
-    },
-    "Kantoorgebouw": {
-        "split": {"Kantoren": 1},
-        "impact_m2": {"hybrid": 100, "secondary": 200, "regular": 500},
-        "min_m2": 1000,
-    },
-    "Laagbouw": {
-        "split": {"Woningen": 1},
-        "impact_m2": {"hybrid": 100, "secondary": 200, "regular": 500},
-        "min_m2": 120,
-    },
-    "Multi-family": {
-        "split": {"Woningen": 1},
-        "impact_m2": {"hybrid": 60, "secondary": 30, "regular": 100},
-        "min_m2": 480,
-    },
-}
+st.write("Here a lot of text describing what you need to do here.")
 
 tabs1, tabs2 = st.tabs(["Woningtypologie", "Gebouwprofielen"])
 if "building_size_slider" not in session:
     session.building_size_slider = {}
-    for key in woning_typologie_m2.keys():
+    for key in BuildingData.woning_typologie_m2.keys():
         session.building_size_slider[key] = 33
 
 # Selection of mix of living sizes.
@@ -62,9 +41,9 @@ with tabs2:
                 min_value=0,
                 max_value=100,
                 label=w,
-                value=session.building_size_slider.get(w, 33)
+                value=session.building_size_slider.get(w, 33),
             )
-            for w in woning_typologie_m2.keys()
+            for w in BuildingData.woning_typologie_m2.keys()
         }
         totaal = sum(session.building_size_slider.values())
         if (totaal) > 100:
@@ -73,14 +52,20 @@ with tabs2:
             st.success(f"Totaal percentage: {totaal}%")
 
     with col3:
-        m2_totaal = list(session.building_size_slider.values()) * np.array(list(woning_typologie_m2.values()))
-        chart_data = pd.DataFrame(((m2_totaal),), columns=session.building_size_slider.keys())
+        m2_totaal = list(session.building_size_slider.values()) * np.array(
+            list(BuildingData.woning_typologie_m2.values())
+        )
+        chart_data = pd.DataFrame(
+            ((m2_totaal),), columns=session.building_size_slider.keys()
+        )
         st.write("M2 per woningtypologie")
         st.bar_chart(chart_data)
 
     # Generate metrics of the projected needs
     housing_needs_m2 = calc.calculate_total_amount_of_houses_per_type(
-        woning_typologie_m2, session.building_size_slider, dwelling_needs_projection["Woningen"]
+        BuildingData.woning_typologie_m2,
+        session.building_size_slider,
+        BuildingData.needs["dwelling_needs"]["Woningen"],
     )
     # Generating the building profile sliders
 
@@ -90,10 +75,10 @@ with tabs1:
 
     col1, col2, col3 = st.columns((1, 1, 1))
 
-    bu_ty = list(building_profiles.keys())
+    bu_ty = list(BuildingData.building_profiles.keys())
     se_ty = unique_impact_keys = {
         key
-        for profile in building_profiles.values()
+        for profile in BuildingData.building_profiles.values()
         for key in profile["impact_m2"].keys()
     }
 
@@ -103,7 +88,9 @@ with tabs1:
     if col1.button("Voeg gebouw toe"):
         if building_type not in session.building_profile:
             session.building_profile[building_type] = {}
-        session.building_profile[building_type][secondary_type] = session.building_profile[building_type].get(secondary_type, 0)
+        session.building_profile[building_type][
+            secondary_type
+        ] = session.building_profile[building_type].get(secondary_type, 0)
 
     # Generating the building profile sliders and storing them in the session state
     def update_slider_value(profile, secondary_type, key):
@@ -113,7 +100,7 @@ with tabs1:
     for profile in session.building_profile.keys():
         for secondary_type in session.building_profile[profile]:
             key = f"{profile}+{secondary_type}"
-            min_value = building_profiles[profile]["min_m2"]
+            min_value = BuildingData.building_profiles[profile]["min_m2"]
             with col1:
                 st.slider(
                     key=key,
@@ -128,22 +115,30 @@ with tabs1:
                 )
 
 impact_df = calc.create_building_profile_impact_table(
-    building_profiles, session.building_profile
+    BuildingData.building_profiles, session.building_profile
 )
 realisation_df = calc.create_building_profile_realisation_table(
-    building_profiles,
+    BuildingData.building_profiles,
     session.building_profile,
 )
-summary_df = calc.summarize_realisation_table(realisation_df,
-                                              other_needs_m2,
-                                            {'Woningen': sum(housing_needs_m2.values())}
-                                            )
+summary_df = calc.summarize_realisation_table(
+    realisation_df,
+    BuildingData.needs["other_needs"],
+    {"Woningen": sum(housing_needs_m2.values())},
+)
 
-col2.dataframe(summary_df, use_container_width=True,
-               hide_index=True,
-               column_config=column_configs.summary_df)
-col2.dataframe(impact_df, use_container_width=True, hide_index=True, 
-               column_config= column_configs.impact_df)
+col2.dataframe(
+    summary_df,
+    use_container_width=True,
+    hide_index=True,
+    column_config=column_configs.summary_df,
+)
+col2.dataframe(
+    impact_df,
+    use_container_width=True,
+    hide_index=True,
+    column_config=column_configs.impact_df,
+)
 col2.dataframe(realisation_df, use_container_width=True, hide_index=True)
 
 st.markdown("##")

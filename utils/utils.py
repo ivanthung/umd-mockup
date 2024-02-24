@@ -1,3 +1,7 @@
+""" This file contains the utility functions for the BAG data and the scenario's. """
+
+import pickle
+from copy import deepcopy
 import geopandas as gpd
 import pandas as pd
 import plotly.graph_objects as go
@@ -7,20 +11,22 @@ import folium
 from streamlit_folium import st_folium
 import streamlit as st
 import matplotlib.pyplot as plt
-import pickle
-from copy import deepcopy
 
 session = st.session_state
-amsterdam_zuidoost = (52.309033724116524, 4.967533318175478)
-zoom_start = 13
-tiles = "Cartodb Positron"
-popup_fields = ["fuuid", "bouwjaar", "gebruiksdo", "sloop", "transform"]
-file_location = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
+LOCATION = (52.309033724116524, 4.967533318175478)
+ZOOM_START = 13
+TILES = "Cartodb Positron"
+POPUP_FIELDS = ["fuuid", "bouwjaar", "gebruiksdo", "sloop", "transform"]
+FILE_LOCATION = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
+
 
 def load_data() -> gpd.GeoDataFrame:
-    """Load the BAG data and create a dummy column for the transformation and demolition of buildings"""
+    """
+    Load the BAG data and create a dummy column for the transformation and demolition of buildings.
+    Should probable be placed in a different file.
+    """
 
-    gdf_bag = gpd.read_file(file_location)
+    gdf_bag = gpd.read_file(FILE_LOCATION)
     gdf_bag = gdf_bag.sample(n=200).reset_index(drop=True)
     gdf_bag["sloop"] = True
     gdf_bag["transform"] = False
@@ -30,34 +36,45 @@ def load_data() -> gpd.GeoDataFrame:
     )
     return gdf_bag
 
+
 def load_scenario_from_file():
     """Load the data from a pickle assign it as a dictionary to the session state variable"""
-    if not 'scenarios' in session:
+    if not "scenarios" in session:
         try:
-            with open('scenarios/scenario_data.pickle', 'rb') as f:
+            with open("scenarios/scenario_data.pickle", "rb") as f:
                 loaded_data = pickle.load(f)
                 session.scenarios = loaded_data
-        except: 
+        except FileNotFoundError:
             st.write("No scenarios found")
+
 
 def load_first_scenario():
     """Load the first scenario from the session state variable"""
-    
-    if 'scenarios' in session and len(session.scenarios):
-        session.building_profile = session.scenarios[list(session.scenarios.keys())[0]]['building_profiles']
-        session.building_size_slider = session.scenarios[list(session.scenarios.keys())[0]]['woning_typologie_m2']
+
+    if "scenarios" in session and len(session.scenarios):
+        session.building_profile = session.scenarios[list(session.scenarios.keys())[0]][
+            "building_profiles"
+        ]
+        session.building_size_slider = session.scenarios[
+            list(session.scenarios.keys())[0]
+        ]["woning_typologie_m2"]
         print("Loaded first scenario from file")
+    else:
+        print("No scenario found")
+
 
 def save_scenario_to_file():
     """Save the data from the session state variable to a pickle file"""
-    with open('scenarios/scenario_data.pickle', 'wb') as f:
+    with open("scenarios/scenario_data.pickle", "wb") as f:
         pickle.dump(session.scenarios, f)
+
 
 def save_scenario_to_session_state(scenario_name, data_to_save: dict):
     """Save the data that we want to keep for the current scenario to the scenario's session state variable"""
     session.scenarios[scenario_name] = {}
     for attribute, value in data_to_save.items():
         session.scenarios[scenario_name][attribute] = deepcopy(value)
+
 
 def display_dummy_sankey(gdf_bag, data) -> go.Figure:
     """Create a dummy sankey plot, just to test the layout and interactivity"""
@@ -85,15 +102,14 @@ def display_dummy_sankey(gdf_bag, data) -> go.Figure:
                 node=dict(
                     pad=15,
                     thickness=20,
-                    line=dict(color="black", width=0.5),
+                    line={"color": "black", "width": 0.5},
                     label=all_nodes,
                 ),
                 link=dict(
                     source=df["source_id"],
                     target=df["target_id"],
                     value=df["Value"],
-                    color="#f0f0f0"  # Very light grey hex code
-
+                    color=["#f0f0f0"] * len(df),  # Very light grey hex code
                 ),
             )
         ]
@@ -117,114 +133,121 @@ def create_map(_gdf_bag, _gdf_bag_no_geom) -> folium.Map:
                 "fillColor": "#FF0000",
                 "color": "#0000FF",
             }  # Red (or your chosen color)
-        else:
-            return {
-                "fillColor": "#0000FF",
-                "color": "#FF0000",
-            }  # Blue (or your chosen color)
 
-    m = folium.Map(location=amsterdam_zuidoost, zoom_start=zoom_start, tiles=tiles)
+        return {
+            "fillColor": "#0000FF",
+            "color": "#FF0000",
+        }  # Blue (or your chosen color)
+
+    m = folium.Map(location=LOCATION, zoom_start=ZOOM_START, tiles=TILES)
     folium.GeoJson(
         _gdf_bag,
         style_function=style_function,
         popup=folium.GeoJsonPopup(
-            fields=popup_fields,
+            fields=POPUP_FIELDS,
         ),
     ).add_to(m)
 
     return st_folium(m, use_container_width=True)
 
+
 def create_project_map(_gdf_bag) -> folium.Map:
     """Create a map with the BAG data, color the buildings based on the 'transform' column"""
 
     # Create a new GeoDataFrame with updated 'transform' and 'sloop' columns
-    
+
     def style_function(feature):
+        """Style function for the GeoJson layer"""
         transform_value = feature["properties"]["transform"]
         if transform_value:  # If 'transform' is True
             return {
                 "fillColor": "#FF0000",
                 "color": "#0000FF",
             }  # Red (or your chosen color)
-        else:
-            return {
-                "fillColor": "#0000FF",
-                "color": "#FF0000",
-            }  # Blue (or your chosen color)
 
-    m = folium.Map(location=amsterdam_zuidoost, zoom_start=zoom_start, tiles=tiles)
+        return {
+            "fillColor": "#0000FF",
+            "color": "#FF0000",
+        }  # Blue (or your chosen color)
+
+    m = folium.Map(location=LOCATION, zoom_start=ZOOM_START, tiles=TILES)
     folium.GeoJson(
         _gdf_bag,
         style_function=style_function,
         popup=folium.GeoJsonPopup(
-            fields=popup_fields,
+            fields=POPUP_FIELDS,
         ),
     ).add_to(m)
 
     return st_folium(m, use_container_width=True)
 
+
 def display_project_shape_diagram(coords) -> plt.Figure:
-    """ Display the shape of the selected project"""
+    """Display the shape of the selected project"""
     x_coords = [point[0] for point in coords[0]]
     y_coords = [point[1] for point in coords[0]]
 
     # Close the polygon (Matplotlib expects the first and last points to be the same)
-    x_coords.append(x_coords[0]) 
+    x_coords.append(x_coords[0])
     y_coords.append(y_coords[0])
 
     # Create the plot
     fig, ax = plt.subplots(figsize=(1, 1))  # Set smaller figure size
-    ax.plot(x_coords, y_coords, color='red')
+    ax.plot(x_coords, y_coords, color="red")
 
     # Remove labels and axes
-    ax.set_xlabel("") 
-    ax.set_ylabel("") 
+    ax.set_xlabel("")
+    ax.set_ylabel("")
     ax.set_xticks([])  # Remove x ticks
     ax.set_yticks([])  # Remove y ticks
     for spine in ax.spines.values():
         spine.set_visible(False)
 
     # Display in Streamlit
-    st.pyplot(fig,use_container_width=False) 
+    st.pyplot(fig, use_container_width=False)
+
 
 def display_project_data(df, selected_point_id, coords):
-    """ Display the data of the selected project"""
-    
-    data = df.loc[df['fuuid'] == selected_point_id]
+    """Display the data of the selected project"""
+
+    data = df.loc[df["fuuid"] == selected_point_id]
 
     col1, col2 = st.columns(2)
     with col1:
         st.title(selected_point_id[0:8])
-        st.write('Bouwjaar:', int(data.iloc[0]['bouwjaar']))
-        st.write('Gebruiksdoel:', data.iloc[0]['gebruiksdo'])
-        sloop = st.selectbox('Sloop', [True, False], index=0)
-        transform = st.selectbox('Transform', [True, False], index=0)
-        project_type = st.selectbox('Project type', ['Biobased', 'Regulier'], index=0)
-        button = st.button('Save changes')    
+        st.write("Bouwjaar:", int(data.iloc[0]["bouwjaar"]))
+        st.write("Gebruiksdoel:", data.iloc[0]["gebruiksdo"])
+        sloop = st.selectbox("Sloop", [True, False], index=0)
+        transform = st.selectbox("Transform", [True, False], index=0)
+        project_type = st.selectbox("Project type", ["Biobased", "Regulier"], index=0)
+        button = st.button("Save changes")
         if button:
-            st.success(f"Changes saved")
-    
+            st.success("Changes saved")
+
     with col2:
         display_project_shape_diagram(coords)
 
 
 def create_scenario_comparison():
+    """Compares scenarios and returns a bar chart."""
     scenario_dfs = {}
     for key, value in session.scenarios.items():
-        scenario_dfs[key] = pd.DataFrame(value['building_profiles'])
-    
+        scenario_dfs[key] = pd.DataFrame(value["building_profiles"])
+
     combined_df = pd.concat(scenario_dfs.values(), keys=scenario_dfs.keys())
     combined_df.reset_index(level=0, inplace=True)
-    melted_df = combined_df.melt(id_vars='level_0', var_name='Gebouwprofiel', value_name='Totale impact')
-    melted_df.rename(columns={'level_0': 'Scenario'}, inplace=True)
+    melted_df = combined_df.melt(
+        id_vars="level_0", var_name="Gebouwprofiel", value_name="Totale impact"
+    )
+    melted_df.rename(columns={"level_0": "Scenario"}, inplace=True)
 
     fig = px.bar(
-        melted_df, 
-        x="Scenario", 
+        melted_df,
+        x="Scenario",
         y="Totale impact",
         # Or use y="Normalized Share" if you calculated relative shares
         color="Gebouwprofiel",
-        barmode='stack',  # Create stacked bars
-        title="Stacked Bar Chart of Gebouwprofiel Impact Across Scenarios"
+        barmode="stack",  # Create stacked bars
+        title="Stacked Bar Chart of Gebouwprofiel Impact Across Scenarios",
     )
     return fig
