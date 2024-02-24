@@ -1,7 +1,3 @@
-Absolutely! Here's a comprehensive README file for the Streamlit application. I've combined the best aspects of different approaches and incorporated insights from your ratings to make this even stronger.
-
-**README.md**
-
 **Project Title: Streamlit Urban Mining Potential Assessment App**
 
 **Overview**
@@ -68,9 +64,3 @@ The project follows a modular structure for maintainability and clarity:
 **Dependencies:**
 
 See the `requirements.txt` file for a complete list of dependencies.
-
-**Contact**
-
-* Feel free to reach out to [your name] ([your email]) for any questions or collaborations.
-
-Let me know if you have any other questions.
