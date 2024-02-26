@@ -39,18 +39,21 @@ def load_bag_data():
         return False
 
 
-def load_scenario_from_file():
+def load_scenario_from_file(scenario_collection_name="scenario_data", load_new=False):
     """
     Load the data from a pickle assign it as a dictionary to the session state variable.
     Only execute this function if the session state variable does not contain a key called "scenarios"
+    Add load_new = True to force loading a new file and overwrite the current session state variable.
     """
-    if not "scenarios" in session:
+    if not "scenarios" in session or load_new:
         try:
-            with open("scenarios/scenario_data.pickle", "rb") as f:
+            with open(f"scenarios/{scenario_collection_name}.pickle", "rb") as f:
                 loaded_data = pickle.load(f)
                 session.scenarios = loaded_data
-        except FileNotFoundError:
-            st.write("No scenarios found")
+                st.success("Scenarios loaded")
+        except Exception as e:
+            st.error("No scenarios found to load")
+            print(e)
 
 
 def load_first_scenario():
@@ -68,9 +71,9 @@ def load_first_scenario():
         print("No scenario found")
 
 
-def save_scenario_to_file():
+def save_scenario_to_file(filename="scenario_data"):
     """Save the data from the session state variable to a pickle file"""
-    with open("scenarios/scenario_data.pickle", "wb") as f:
+    with open(f"scenarios/{filename}.pickle", "wb") as f:
         pickle.dump(session.scenarios, f)
 
 

@@ -15,18 +15,10 @@ This Streamlit application provides valuable insights for urban planners, policy
    * Python 3.6 or later
    * Pip (package installer for Python)
 
-2. **Installation**
+2. **Running the App**
 
    ```bash
-   git clone https://github.com/your-username/streamlit-urban-mining-app  # Replace with your repo link
-   cd streamlit-urban-mining-app
-   pip install -r requirements.txt
-   ```
-
-3. **Running the App**
-
-   ```bash
-   streamlit run /Users/ivanthung/code/mock_up_umdashboard/readmeprep.py
+   streamlit run Start.py
    ```
 
    This will open the app in your web browser, typically at http://localhost:8501.
@@ -35,8 +27,6 @@ This Streamlit application provides valuable insights for urban planners, policy
 
 The project follows a modular structure for maintainability and clarity:
 
-* **`/Users/ivanthung/code/mock_up_umdashboard/readmeprep.py`:**  The main entry point for the Streamlit app.
-* **`/Users/ivanthung/code/mock_up_umdashboard/__init__.py`:** Empty file to indicate that the 'mock_up_umdashboard' directory is a Python package.
 * **`/Users/ivanthung/code/mock_up_umdashboard/Start.py`:** Contains the code for the initial landing page of the application.
 * **`/Users/ivanthung/code/mock_up_umdashboard/utils/`:**  This directory houses utility modules:
     * **`ai_report.py`:** Handles interaction with the AI model for report generation.
@@ -47,19 +37,11 @@ The project follows a modular structure for maintainability and clarity:
     * **`column_configs.py`:** Specific column configurations for dataframes and visualizations used in the app.
     * **`data_manager.py`:** Loads and manages data (BAG dataset, scenarios) in the session state.
 * **`/Users/ivanthung/code/mock_up_umdashboard/pages/`:** Contains individual pages of the Streamlit app:
-    * **`1_1 - Sloop en transformatie.py`** :  Allows editing of demolition and transformation parameters within the BAG dataset, and provides insights on building profiles.
-    * **`2_2 - Nieuwbouw.py`**: Enables the selection of building typologies for new construction scenarios.
 
 **Data**
 
 * **`spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp`:** Sample BAG dataset (shapefile format). Replace with your comprehensive dataset.
 * **`scenarios/scenario_data.pickle`:** (If applicable) Stores saved user-generated scenarios for future use.
-
-**Features**
-
-* **Dynamic visualizations:** Interactive charts and maps provide an engaging data exploration experience.
-* **Scenario building:**  Users can create and compare different urban  development scenarios.
-* **AI-generated reports:**  The app leverages an AI model (like GPT-4) to summarize findings and offer insights tailored to specific stakeholders.
 
 **Dependencies:**
 

@@ -12,7 +12,7 @@ from utils.reportgenerator import generate_report_pdf
 
 
 layout.set_page_title("Resultaten")
-data_manager.load_scenario_from_file()
+layout.save_and_load_scenario_sidebar()
 session = st.session_state
 
 if "scenarios" in session and len(session.scenarios):

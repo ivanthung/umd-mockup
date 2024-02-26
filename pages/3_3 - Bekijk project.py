@@ -15,6 +15,7 @@ data_manager.load_bag_data()
 col1, col2 = st.columns(2)
 with col1:
     interaction_data = utils.create_project_map(session.geometry_bag)
+    st.write(interaction_data)
 
 with col2:
     try:
