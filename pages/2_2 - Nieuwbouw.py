@@ -16,7 +16,7 @@ from utils import column_configs
 layout.set_page_title("Keuze nieuwbouw")
 session = st.session_state
 
-data_manager.load_scenario_from_file()
+layout.save_and_load_scenario_sidebar()
 data_manager.load_first_scenario()
 
 if "BuildingData" not in session:
@@ -143,11 +143,12 @@ col2.dataframe(
 col2.dataframe(realisation_df, use_container_width=True, hide_index=True)
 
 st.markdown("##")
-layout.save_scenario_form(
-    to_file=False,
-    building_profiles=session.building_profile,
-    woning_typologie_m2=session.building_size_slider,
-    impact_df=impact_df,
-    realisation_df=realisation_df,
-    summary_df=summary_df,
-)
+col1, col2 = st.columns((1, 1))
+with col1:
+    layout.save_scenario_to_session_state_form(
+        building_profiles=session.building_profile,
+        woning_typologie_m2=session.building_size_slider,
+        impact_df=impact_df,
+        realisation_df=realisation_df,
+        summary_df=summary_df,
+    )
