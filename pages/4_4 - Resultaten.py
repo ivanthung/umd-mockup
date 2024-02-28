@@ -1,6 +1,4 @@
-# todo
-# add scenario loading and load first scenario.
-# Report download button / layout.
+""" Results page with saving options and AI report generation. """
 
 import streamlit as st
 
