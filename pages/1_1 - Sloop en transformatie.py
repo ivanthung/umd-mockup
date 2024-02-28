@@ -7,10 +7,8 @@ It takes a randoms sample from the BAG dataset and initializes some random defau
 import numpy as np
 import pandas as pd
 import streamlit as st
-from utils import display_helpers
-from utils import layout
-from utils import data_manager
 from utils import calculations as calc
+from utils import data_manager, layout, display_helpers
 
 session = st.session_state
 layout.set_page_title("Sloop en nieuwbouw")
@@ -62,12 +60,12 @@ with col2:
 
         def update_office_button():
             """necessary evil function to update the data in the dataframe."""
-            session.gdf_bag.loc[
-                session.gdf_bag["use"] == "Office", "transform"
-            ] = np.random.choice(
-                [True, False],
-                size=len(session.gdf_bag[session.gdf_bag["use"] == "Office"]),
-                p=[transform_slider / 100, 1 - transform_slider / 100],
+            session.gdf_bag.loc[session.gdf_bag["use"] == "Office", "transform"] = (
+                np.random.choice(
+                    [True, False],
+                    size=len(session.gdf_bag[session.gdf_bag["use"] == "Office"]),
+                    p=[transform_slider / 100, 1 - transform_slider / 100],
+                )
             )
             display_helpers.create_map.clear()
 

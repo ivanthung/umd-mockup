@@ -1,4 +1,5 @@
 """ Generation of key calculations and tables"""
+
 import pandas as pd
 
 
@@ -37,7 +38,6 @@ def create_building_profile_realisation_table(
     building_profiles: dict,
     building_profiles_user_data: dict,
 ) -> pd.DataFrame:
-
     """Create a table with actual realisation of gebruik fo reach of the building profiles."""
     realistion_table = []
     for profile, profile_data in building_profiles_user_data.items():

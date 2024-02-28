@@ -3,9 +3,10 @@ ToDo: save this to a file and load it from a file"""
 
 import pandas as pd
 import streamlit as st
+
 from utils.buildingdata import BuildingData
-from utils.layout import set_page_title
 from utils.column_configs import split_column
+from utils.layout import set_page_title
 
 print("rerun at time: ", pd.Timestamp.now())
 set_page_title("Edit building profiles")

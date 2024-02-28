@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "umd-mockup"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.10.6"
+streamlit = "^1.31.1"
+geopandas = "^0.14.3"
+matplotlib = "^3.8.3"
+streamlit-folium = "^0.18.0"
+plotly = "^5.19.0"
+streamlit-extras = "^0.4.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.2.0"
+isort = "^5.13.2"
+pycln = "^2.4.0"
+pytest = "^8.0.2"
+pylint = "^3.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "import-error, use-dict-literal"
+
+[tool.pylint.BASIC]
+good-names = "i, j, k, ex, Run, df, l, l1, l2, l3, m, ax, f, s"

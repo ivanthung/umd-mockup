@@ -1,9 +1,0 @@
-{
-  "reportMissingImports": true,
-  "pythonVersion": "3.10.0",
-  "venvPath": "/Users/ivanthung/.pyenv/versions/",
-  "venv": "st_umd",
-  "python.analysis.extraPaths": [
-    "/Users/ivanthung/.pyenv/versions/st_umd/lib/python3.10/site-packages"
-  ]
-}

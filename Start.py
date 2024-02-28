@@ -1,9 +1,9 @@
 """ Starting page for the Streamlit app"""
 
 import streamlit as st
-from utils import data_manager
-from utils import layout
 from streamlit_extras.app_logo import add_logo
+
+from utils import data_manager, layout
 
 session = st.session_state
 layout.set_page_title("About")

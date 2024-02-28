@@ -4,9 +4,8 @@ It does not yet allow you to update the state, even though buttons are present.
 """
 
 import streamlit as st
-from utils import display_helpers
-from utils import layout
-from utils import data_manager
+
+from utils import data_manager, layout, display_helpers
 
 session = st.session_state
 layout.set_page_title("Pas project aan")

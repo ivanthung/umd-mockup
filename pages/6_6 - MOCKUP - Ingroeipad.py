@@ -1,6 +1,6 @@
-import streamlit as st
-import plotly.express as px
 import numpy as np
+import plotly.express as px
+import streamlit as st
 
 
 def create_s_curve(start_year, end_year, peak_value, peak_year):
