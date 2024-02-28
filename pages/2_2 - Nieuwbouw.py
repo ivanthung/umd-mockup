@@ -8,7 +8,7 @@ import pandas as pd
 import streamlit as st
 
 from utils import calculations as calc
-from utils import column_configs, data_manager, layout, utils
+from utils import column_configs, data_manager, layout
 from utils.buildingdata import BuildingData
 
 layout.set_page_title("Keuze nieuwbouw")

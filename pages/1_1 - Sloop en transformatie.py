@@ -7,9 +7,8 @@ It takes a randoms sample from the BAG dataset and initializes some random defau
 import numpy as np
 import pandas as pd
 import streamlit as st
-
 from utils import calculations as calc
-from utils import data_manager, layout, utils
+from utils import data_manager, layout, display_helpers
 
 session = st.session_state
 layout.set_page_title("Sloop en nieuwbouw")
@@ -25,7 +24,7 @@ def update_data():
 
 col1, col2 = st.columns(2)
 with col1:
-    st_data = utils.create_map(session.geometry_bag, session.gdf_bag)
+    st_data = display_helpers.create_map(session.geometry_bag, session.gdf_bag)
 
 with col2:
     st.data_editor(
@@ -48,7 +47,7 @@ with col2:
 
         def refresh_map():
             """Clear the cache of the map to force a refresh."""
-            utils.create_map.clear()
+            display_helpers.create_map.clear()
 
         st.button("Refresh map", on_click=refresh_map)
         # We can do load the selected point here if necessary.
@@ -68,7 +67,7 @@ with col2:
                     p=[transform_slider / 100, 1 - transform_slider / 100],
                 )
             )
-            utils.create_map.clear()
+            display_helpers.create_map.clear()
 
         st.button("Transform random office buildings", on_click=update_office_button)
 
@@ -93,7 +92,7 @@ with col1:
         )
 with col2:
     mfa_data = calc.create_mfa_data()
-    fig = utils.display_dummy_sankey(mfa_data)
+    fig = display_helpers.display_dummy_sankey(mfa_data)
     st.plotly_chart(fig)
 
 print("Ran at: ", pd.Timestamp.now())

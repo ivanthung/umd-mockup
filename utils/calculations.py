@@ -51,9 +51,9 @@ def create_building_profile_realisation_table(
 
 
 def calculate_total_amount_of_houses_per_type(
-    m2_per_housing_type,
-    percentage_per_housing_type,
-    projected_houses,
+    m2_per_housing_type: dict,
+    percentage_per_housing_type: dict,
+    projected_houses: int,
 ) -> dict:
     """Multiplies the m2 per housing type with the percentage per housing type to get the amount of houses per housing type.
     Returns dict with amount of housing per type"""

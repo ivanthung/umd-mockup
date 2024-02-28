@@ -3,7 +3,7 @@
 import streamlit as st
 
 import utils.column_configs as column_configs
-from utils import data_manager, layout, utils
+from utils import layout, display_helpers
 from utils.ai_report import produce_report
 from utils.reportgenerator import generate_report_pdf
 
@@ -17,7 +17,7 @@ if "scenarios" in session and len(session.scenarios):
 
     with tabs[0]:
         col1, col2 = st.columns((1, 2))
-        comparison_fig = utils.create_scenario_comparison()
+        comparison_fig = display_helpers.create_scenario_comparison()
         with col1:
             container = st.empty()
 

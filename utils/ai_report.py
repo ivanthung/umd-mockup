@@ -30,8 +30,9 @@ def create_report_message() -> dict:
     return message
 
 
-def get_ai_report(message):
+def get_ai_report(message: dict) -> dict:
     """Get the AI report from OpenAI's GPT-4 model based on the message."""
+
     report = client.chat.completions.create(
         model="gpt-4-0125-preview", messages=[message], stream=True
     )

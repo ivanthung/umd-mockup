@@ -4,7 +4,7 @@ import os
 
 import streamlit as st
 
-from utils import data_manager, utils
+from utils import data_manager
 
 
 def set_page_title(title: str, divider: bool = True) -> None:
