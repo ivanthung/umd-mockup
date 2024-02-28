@@ -2,15 +2,16 @@
 Needs to be imported in all pages that use spatial data or scenarios."""
 
 import pickle
+import os
 from copy import deepcopy
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import streamlit as st
+from utils.paths import BUILDINGS_FILE, SCENARIO_DIR
 
 session = st.session_state
-FILE_LOCATION = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
 
 
 def load_bag_data():
@@ -23,7 +24,7 @@ def load_bag_data():
 
     try:
         with st.spinner("Loading spatial data in session"):
-            gdf_bag = gpd.read_file(FILE_LOCATION)
+            gdf_bag = gpd.read_file(BUILDINGS_FILE)
             gdf_bag = gdf_bag.sample(n=200).reset_index(drop=True)
             gdf_bag["sloop"] = True
             gdf_bag["transform"] = False
@@ -48,7 +49,8 @@ def load_scenario_from_file(scenario_collection_name="scenario_data", load_new=F
     """
     if not "scenarios" in session or load_new:
         try:
-            with open(f"scenarios/{scenario_collection_name}.pickle", "rb") as f:
+            filename = os.path.join(SCENARIO_DIR, f"{scenario_collection_name}.pickle")
+            with open(filename, "rb") as f:
                 loaded_data = pickle.load(f)
                 session.scenarios = loaded_data
                 st.success("Scenarios loaded")
@@ -72,9 +74,10 @@ def load_first_scenario():
         print("No scenario found")
 
 
-def save_scenario_to_file(filename="scenario_data"):
+def save_scenario_to_file(scenario_collection_name="scenario_data"):
     """Save the data from the session state variable to a pickle file"""
-    with open(f"scenarios/{filename}.pickle", "wb") as f:
+    filename = os.path.join(SCENARIO_DIR, f"{scenario_collection_name}.pickle")
+    with open(filename, "wb") as f:
         pickle.dump(session.scenarios, f)
 
 

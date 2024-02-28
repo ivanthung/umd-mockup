@@ -1,9 +1,7 @@
 """ This file contains the utility functions for creating maps and visual elements """
 
 import folium
-import geopandas as gpd
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -16,8 +14,6 @@ LOCATION = (52.309033724116524, 4.967533318175478)
 ZOOM_START = 13
 TILES = "Cartodb Positron"
 POPUP_FIELDS = ["fuuid", "bouwjaar", "gebruiksdo", "sloop", "transform"]
-FILE_LOCATION = "spatial_data/final/bag-ams-zuidoost-platdak-buurt.shp"
-
 
 def display_dummy_sankey(data) -> go.Figure:
     """Create a dummy sankey plot, just to test the layout and interactivity"""
@@ -139,7 +135,7 @@ def display_project_shape_diagram(coords) -> plt.Figure:
         spine.set_visible(False)
 
     # Display in Streamlit
-    st.pyplot(fig, use_container_width=False)
+    return fig
 
 
 def display_project_data(df, selected_point_id, coords):
@@ -160,7 +156,8 @@ def display_project_data(df, selected_point_id, coords):
             st.success("Changes saved")
 
     with col2:
-        display_project_shape_diagram(coords)
+        fig = display_project_shape_diagram(coords)
+        st.pyplot(fig, use_container_width=False)
 
 
 def create_scenario_comparison():
