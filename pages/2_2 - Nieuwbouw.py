@@ -3,15 +3,13 @@ This page is used to set the mix of building types to be used in a scenario.
 It saves the scenario to the session state and to a file.
 """
 
-import streamlit as st
-import pandas as pd
 import numpy as np
-from utils.buildingdata import BuildingData
-from utils import layout
-from utils import data_manager
+import pandas as pd
+import streamlit as st
+
 from utils import calculations as calc
-from utils import utils
-from utils import column_configs
+from utils import column_configs, data_manager, layout, utils
+from utils.buildingdata import BuildingData
 
 layout.set_page_title("Keuze nieuwbouw")
 session = st.session_state
@@ -89,9 +87,9 @@ with tabs1:
     if col1.button("Voeg gebouw toe"):
         if building_type not in session.building_profile:
             session.building_profile[building_type] = {}
-        session.building_profile[building_type][
-            secondary_type
-        ] = session.building_profile[building_type].get(secondary_type, 0)
+        session.building_profile[building_type][secondary_type] = (
+            session.building_profile[building_type].get(secondary_type, 0)
+        )
 
     # Generating the building profile sliders and storing them in the session state
     def update_slider_value(profile, secondary_type, key):

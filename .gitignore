@@ -7,4 +7,5 @@
 *.DS_Store
 /.streamlit/secrets.toml
 readmeprep.py
-*__pycache__/
+__pycache__
+.tool-versions

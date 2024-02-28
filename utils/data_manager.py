@@ -3,9 +3,10 @@ Needs to be imported in all pages that use spatial data or scenarios."""
 
 import pickle
 from copy import deepcopy
+
 import geopandas as gpd
-import pandas as pd
 import numpy as np
+import pandas as pd
 import streamlit as st
 
 session = st.session_state

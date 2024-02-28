@@ -1,15 +1,14 @@
 """ This file contains the utility functions for creating maps and visual elements """
 
-from copy import deepcopy
-import numpy as np
-import pandas as pd
+import folium
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 from streamlit_folium import st_folium
-import plotly.graph_objects as go
-import plotly.express as px
-import folium
 
 session = st.session_state
 

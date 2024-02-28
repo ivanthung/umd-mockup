@@ -1,4 +1,5 @@
 """ This module is responsible for generating a report based on the user's input. """
+
 import streamlit as st
 from openai import OpenAI
 

@@ -1,10 +1,11 @@
 """ This module contains the logic to generate a PDF report from the data visualizations and tables. """
 
-from io import BytesIO
 import base64
+from io import BytesIO
+
+import plotly.io as pio
 import streamlit as st
 import xhtml2pdf.pisa as pisa
-import plotly.io as pio
 from jinja2 import Environment, FileSystemLoader
 
 # This is necessary to render the Plotly figures as SVG images in color as streamlit defaults to B&W.
