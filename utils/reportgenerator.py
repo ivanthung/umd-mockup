@@ -5,8 +5,10 @@ from io import BytesIO
 
 import plotly.io as pio
 import streamlit as st
-import xhtml2pdf.pisa as pisa
 from jinja2 import Environment, FileSystemLoader
+from xhtml2pdf import pisa
+
+from utils.paths import TEMPLATES_DIR
 
 # This is necessary to render the Plotly figures as SVG images in color as streamlit defaults to B&W.
 pio.templates.default = "plotly"
@@ -22,7 +24,7 @@ def render_html(text: str, figs_in_base64: dict) -> str:
     figs_html = " ".join(figs)
 
     file_loader = FileSystemLoader(
-        "resources/templates"
+        TEMPLATES_DIR
     )  # Specify the directory of your templates
     env = Environment(loader=file_loader)
     template = env.get_template("report.html")
@@ -58,6 +60,5 @@ def generate_report_pdf(text: str, figs: dict):
         pdf_bytes = pdf_output.getvalue()  # Get PDF data as bytes
         pdf_output.close()  # Close in-memory file
         return pdf_bytes
-    else:
-        st.error("Error generating PDF.")
-        return None
+    st.error("Error generating PDF.")
+    return None

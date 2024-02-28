@@ -14,7 +14,7 @@ This Streamlit application provides valuable insights for urban planners, policy
 1. **Prerequisites**
    * Python 3.10.6
    * Poetry (package installer for Python)
-   * Pre-commit (e.g. brew install pre-commit, see: ))
+   * make utility (pre-installed on Mac)
    * Pyenv (for managing Python versions)
 
 2. **Installation**
@@ -25,9 +25,7 @@ This Streamlit application provides valuable insights for urban planners, policy
    pyenv virtualenv 3.10.6 mock_up_umdashboard
    pyenv activate mock_up_umdashboard
    poetry install
-
-   # Setting up pre-commit hooks
-   pre-commit install
+   
    ```
 
 3. **Adding dependencies**
@@ -43,7 +41,10 @@ This Streamlit application provides valuable insights for urban planners, policy
    streamlit run Start.py
    ```
 
-   This will open the app in your web browser, typically at http://localhost:8501.
+   This will open the app in your web browser.
+
+4. **Running the App**
+
 
 **Structure**
 

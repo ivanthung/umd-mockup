@@ -14,6 +14,7 @@ streamlit-folium = "^0.18.0"
 plotly = "^5.19.0"
 streamlit-extras = "^0.4.0"
 openai = "^1.12.0"
+xhtml2pdf = "^0.2.15"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.2.0"
@@ -27,7 +28,8 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "import-error, use-dict-literal"
+disable = "import-error, use-dict-literal, broad-except, E1136, E1137"
+max-line-length = 150
 
 [tool.pylint.BASIC]
 good-names = "i, j, k, ex, Run, df, l, l1, l2, l3, m, ax, f, s"
