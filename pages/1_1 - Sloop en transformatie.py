@@ -7,8 +7,9 @@ It takes a randoms sample from the BAG dataset and initializes some random defau
 import numpy as np
 import pandas as pd
 import streamlit as st
+
 from utils import calculations as calc
-from utils import data_manager, layout, display_helpers
+from utils import data_manager, display_helpers, layout
 
 session = st.session_state
 layout.set_page_title("Sloop en nieuwbouw")
