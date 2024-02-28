@@ -1,8 +1,10 @@
 """ Contains re-usable visual components for the app."""
+
 import os
+
 import streamlit as st
-from utils import utils
-from utils import data_manager
+
+from utils import data_manager, utils
 
 
 def set_page_title(title: str, divider: bool = True) -> None:

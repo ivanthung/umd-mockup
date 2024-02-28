@@ -3,13 +3,11 @@
 # Report download button / layout.
 
 import streamlit as st
-from utils import utils
-from utils import layout
-from utils import data_manager
+
 import utils.column_configs as column_configs
+from utils import data_manager, layout, utils
 from utils.ai_report import produce_report
 from utils.reportgenerator import generate_report_pdf
-
 
 layout.set_page_title("Resultaten")
 layout.save_and_load_scenario_sidebar()

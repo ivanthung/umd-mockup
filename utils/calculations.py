@@ -1,4 +1,5 @@
 """ Generation of key calculations and tables"""
+
 import pandas as pd
 
 

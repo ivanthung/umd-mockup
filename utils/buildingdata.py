@@ -1,5 +1,6 @@
 """ Classes to hold building profile data.
 Also holds building needs data and woning typologie data, but this may need to be moved to a different class."""
+
 import math
 
 
