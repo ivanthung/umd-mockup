@@ -61,12 +61,12 @@ with col2:
 
         def update_office_button():
             """necessary evil function to update the data in the dataframe."""
-            session.gdf_bag.loc[
-                session.gdf_bag["use"] == "Office", "transform"
-            ] = np.random.choice(
-                [True, False],
-                size=len(session.gdf_bag[session.gdf_bag["use"] == "Office"]),
-                p=[transform_slider / 100, 1 - transform_slider / 100],
+            session.gdf_bag.loc[session.gdf_bag["use"] == "Office", "transform"] = (
+                np.random.choice(
+                    [True, False],
+                    size=len(session.gdf_bag[session.gdf_bag["use"] == "Office"]),
+                    p=[transform_slider / 100, 1 - transform_slider / 100],
+                )
             )
             utils.create_map.clear()
 

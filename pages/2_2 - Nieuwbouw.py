@@ -87,9 +87,9 @@ with tabs1:
     if col1.button("Voeg gebouw toe"):
         if building_type not in session.building_profile:
             session.building_profile[building_type] = {}
-        session.building_profile[building_type][
-            secondary_type
-        ] = session.building_profile[building_type].get(secondary_type, 0)
+        session.building_profile[building_type][secondary_type] = (
+            session.building_profile[building_type].get(secondary_type, 0)
+        )
 
     # Generating the building profile sliders and storing them in the session state
     def update_slider_value(profile, secondary_type, key):
