@@ -3,11 +3,13 @@ Needs to be imported in all pages that use spatial data or scenarios."""
 
 import os
 import pickle
+import os
 from copy import deepcopy
 
 import geopandas as gpd
 import numpy as np
 import streamlit as st
+from utils.paths import BUILDINGS_FILE, SCENARIO_DIR
 
 from utils.paths import BUILDINGS_FILE, SCENARIO_DIR
 

@@ -15,7 +15,6 @@ ZOOM_START = 13
 TILES = "Cartodb Positron"
 POPUP_FIELDS = ["fuuid", "bouwjaar", "gebruiksdo", "sloop", "transform"]
 
-
 def display_dummy_sankey(data) -> go.Figure:
     """Create a dummy sankey plot, just to test the layout and interactivity"""
 

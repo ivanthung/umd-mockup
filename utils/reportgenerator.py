@@ -7,7 +7,6 @@ import plotly.io as pio
 import streamlit as st
 from jinja2 import Environment, FileSystemLoader
 from xhtml2pdf import pisa
-
 from utils.paths import TEMPLATES_DIR
 
 # This is necessary to render the Plotly figures as SVG images in color as streamlit defaults to B&W.
