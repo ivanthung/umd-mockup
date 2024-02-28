@@ -7,6 +7,7 @@ import plotly.io as pio
 import streamlit as st
 import xhtml2pdf.pisa as pisa
 from jinja2 import Environment, FileSystemLoader
+from utils.paths import TEMPLATES_DIR
 
 # This is necessary to render the Plotly figures as SVG images in color as streamlit defaults to B&W.
 pio.templates.default = "plotly"
@@ -22,7 +23,7 @@ def render_html(text: str, figs_in_base64: dict) -> str:
     figs_html = " ".join(figs)
 
     file_loader = FileSystemLoader(
-        "resources/templates"
+        TEMPLATES_DIR
     )  # Specify the directory of your templates
     env = Environment(loader=file_loader)
     template = env.get_template("report.html")
