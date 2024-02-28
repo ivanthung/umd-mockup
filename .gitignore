@@ -8,4 +8,5 @@
 /.streamlit/secrets.toml
 readmeprep.py
 __pycache__
+/.venv
 .tool-versions

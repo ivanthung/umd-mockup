@@ -1,4 +1,5 @@
 import pytest
+
 from utils import calculations
 
 
@@ -15,6 +16,7 @@ def sample_data():
 
 def test_create_building_profile_impact_table():
     pass
+
 
 import pytest
 

@@ -3,7 +3,7 @@
 import streamlit as st
 
 import utils.column_configs as column_configs
-from utils import layout, display_helpers
+from utils import display_helpers, layout
 from utils.ai_report import produce_report
 from utils.reportgenerator import generate_report_pdf
 
