@@ -72,7 +72,7 @@ runs:
     #   shell: bash
 
 
-    # - name: Run pytest
-    #   working-directory: ${{ inputs.working-directory }}
-    #   run: poetry run pytest
-    #   shell: bash
+    - name: Run pytest
+      working-directory: ${{ inputs.working-directory }}
+      run: poetry run pytest
+      shell: bash

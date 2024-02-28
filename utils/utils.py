@@ -1,9 +1,7 @@
 """ This file contains the utility functions for creating maps and visual elements """
 
 import folium
-import geopandas as gpd
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go

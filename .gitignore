@@ -9,3 +9,4 @@
 readmeprep.py
 __pycache__
 .tool-versions
+.venv

@@ -1,13 +1,13 @@
 """ Starting page for the Streamlit app"""
 
 import streamlit as st
-from streamlit_extras.app_logo import add_logo
 
 from utils import data_manager, layout
 
 session = st.session_state
 layout.set_page_title("About")
 data_manager.load_bag_data()
+
 
 st.markdown(
     """
