@@ -66,6 +66,12 @@ runs:
       with:
         configuration: --profile black
 
+    # - name: Run pylint
+    #   working-directory: ${{ inputs.working-directory }}
+    #   run: poetry run pylint .
+    #   shell: bash
+
+
     # - name: Run pytest
     #   working-directory: ${{ inputs.working-directory }}
     #   run: poetry run pytest
