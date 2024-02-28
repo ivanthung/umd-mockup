@@ -1,7 +1,7 @@
 """ Contains re-usable visual components for the app."""
 import os
 import streamlit as st
-from utils import utils
+from utils import display_helpers
 from utils import data_manager
 
 

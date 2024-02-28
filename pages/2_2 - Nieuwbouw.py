@@ -10,7 +10,7 @@ from utils.buildingdata import BuildingData
 from utils import layout
 from utils import data_manager
 from utils import calculations as calc
-from utils import utils
+from utils import display_helpers
 from utils import column_configs
 
 layout.set_page_title("Keuze nieuwbouw")

@@ -18,7 +18,8 @@ BuildingData = session.BuildingData
 
 
 def app():
-    """Interface for editing the building profiles. Wrapped in an app function because of the helper functions"""
+    """Interface for editing the building profiles.
+    Wrapped in an app function because of the helper functions"""
 
     editable_data = st.selectbox(
         "Select data to edit",

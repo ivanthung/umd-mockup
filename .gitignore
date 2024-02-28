@@ -8,3 +8,4 @@
 /.streamlit/secrets.toml
 readmeprep.py
 *__pycache__/
+report.pdf

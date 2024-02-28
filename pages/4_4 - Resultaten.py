@@ -1,9 +1,7 @@
-# todo
-# add scenario loading and load first scenario.
-# Report download button / layout.
+""" Results page with saving options"""
 
 import streamlit as st
-from utils import utils
+from utils import display_helpers
 from utils import layout
 from utils import data_manager
 import utils.column_configs as column_configs
@@ -21,7 +19,7 @@ if "scenarios" in session and len(session.scenarios):
 
     with tabs[0]:
         col1, col2 = st.columns((1, 2))
-        comparison_fig = utils.create_scenario_comparison()
+        comparison_fig = display_helpers.create_scenario_comparison()
         with col1:
             container = st.empty()
 
