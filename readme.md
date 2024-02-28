@@ -12,10 +12,32 @@ This Streamlit application provides valuable insights for urban planners, policy
 **Getting Started**
 
 1. **Prerequisites**
-   * Python 3.6 or later
-   * Pip (package installer for Python)
+   * Python 3.10.6
+   * Poetry (package installer for Python)
+   * Pre-commit (e.g. brew install pre-commit, see: ))
+   * Pyenv (for managing Python versions)
 
-2. **Running the App**
+2. **Installation**
+
+   ```bash
+   # Setting up the virtual env and installing dependencies
+   pyenv install 3.10.6
+   pyenv virtualenv 3.10.6 mock_up_umdashboard
+   pyenv activate mock_up_umdashboard
+   poetry install
+
+   # Setting up pre-commit hooks
+   pre-commit install
+   ```
+
+3. **Adding dependencies**
+
+   ```bash
+   # Adding new dependencies
+   poetry add <package_name>
+   ```
+
+3. **Running the App**
 
    ```bash
    streamlit run Start.py
