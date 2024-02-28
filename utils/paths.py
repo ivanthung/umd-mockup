@@ -7,3 +7,4 @@ BUILDINGS_FILE = os.path.join(DATA_DIR, "final", "bag-ams-zuidoost-platdak-buurt
 REPORTS_DIR = "processed_results"
 SCENARIO_DIR = "scenarios"
 TEMPLATES_DIR = os.path.join("resources", "templates")
+

@@ -5,6 +5,8 @@ import math
 
 
 class BuildingData:
+    """Class to hold all building profile data. Includes a needs dictionary but may want to put this in a different class."""
+
     def __init__(self):
         self.needs = {}
         self.building_profiles = {}
@@ -15,19 +17,15 @@ class BuildingData:
             "building_profiles": self.building_profiles,
             "woning_typologie_m2": self.woning_typologie_m2,
         }
-        pass
 
     def load_all_data(self):
-        self.load_bag_data()
+        """Generic function to load all the data from the bag, needs and building profiles."""
         self.load_needs_data()
         self.load_building_profile_data()
 
-    def load_bag_data(self):
-        # load data from the bag.
-        pass
-
     def load_needs_data(self):
-        """Load the needs data. This data should be put somewhere else, but for now it's here. Creates a list of building uses to use e.g. to set a column config"""
+        """Load the needs data. This data should be put somewhere else, but for now it's here.
+        Creates a list of building uses to use e.g. to set a column config"""
         self.needs["dwelling_needs"] = {"Woningen": 600}
         self.needs["other_needs"] = {
             "Kantoren": 10000,
@@ -83,33 +81,37 @@ class BuildingData:
             "description": "Beschrijf hier het gebouwprofiel.",
         }
 
-    def update_profile_split(self, profile_name, new_value):
-        sum_new_values = sum(new_value.values())
+    def update_profile_split(self, profile_name: str, new_split: dict):
+        """Updates the split of the building use (e.g. office, woningen, etc.
+        in the building profile. The split should be a dictionary with the building uses as keys and the percentage
+        of the building that should be used for that purpose as values.
+        """
+        sum_new_values = sum(new_split.values())
         if profile_name in self.building_profiles:
             if math.isclose(sum_new_values, 1, abs_tol=0.0001):
-                self.building_profiles[profile_name]["split"] = new_value
+                self.building_profiles[profile_name]["split"] = new_split
                 return True
-            else:
-                print("error with the addion")
-                return False
-
-    def update_profile_impact(self, profile_name, new_value):
-        if profile_name in self.building_profiles:
-            self.building_profiles[profile_name]["impact_m2"] = new_value
-            return True
-        else:
+            print("Sum of new values is not 1")
             return False
+        print("Profile not found")
+        return False
 
-    def update_profile_min_m2(self, profile_name, new_value):
+    def update_profile_impact(self, profile_name: str, new_impact: dict):
+        """Updates the impact of the building profile. This is the impact of the building profile per m2."""
         if profile_name in self.building_profiles:
-            self.building_profiles[profile_name]["min_m2"] = new_value
+            self.building_profiles[profile_name]["impact_m2"] = new_impact
             return True
-        else:
-            return False
+        return False
+
+    def update_profile_min_m2(self, profile_name: str, new_m2: int):
+        """Updates the minimum m2 of the building profile. This is the minimum amount of m2 that the building should have."""
+        if profile_name in self.building_profiles:
+            self.building_profiles[profile_name]["min_m2"] = new_m2
+            return True
+        return False
 
     def add_building_profile(self, profile_name: str, profile_data: dict) -> bool:
-        """Adds a new building profile
-
+        """Adds a new building profil
         Args:
             profile_name: The name of the new profile
             profile_data: A dictionary containing 'split', 'impact_m2', and 'min_m2'
@@ -121,20 +123,20 @@ class BuildingData:
                 print("Profile added successfully")
                 print(self.building_profiles)
                 return True
-            else:
-                print("Profile not valid")
-                return False  # Indicate failure due to invalid data
-        else:
-            print("Profile name conflict")
-            return False  # Indicate failure due to profile name conflict
+            print("Profile not valid")
+            return False  # Indicate failure due to invalid data
+        print("Profile name conflict")
+        return False  # Indicate failure due to profile name conflict
 
-    def update_profile_description(self, profile_name, new_value):
+    def update_profile_description(self, profile_name, new_description: str):
+        """Updates the description of the building profile. This is a string that describes the building profile."""
         if profile_name in self.building_profiles:
-            self.building_profiles[profile_name]["description"] = new_value
+            self.building_profiles[profile_name]["description"] = new_description
             return True
-        else:
-            return False
+        return False
 
     def validate_building_profile(self, profile_data: dict):
         """ToDo: Validates the building profile data"""
-        return True
+        if profile_data:
+            return True
+        return False

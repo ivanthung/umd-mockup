@@ -148,9 +148,6 @@ def display_project_data(df, selected_point_id, coords):
         st.title(selected_point_id[0:8])
         st.write("Bouwjaar:", int(data.iloc[0]["bouwjaar"]))
         st.write("Gebruiksdoel:", data.iloc[0]["gebruiksdo"])
-        sloop = st.selectbox("Sloop", [True, False], index=0)
-        transform = st.selectbox("Transform", [True, False], index=0)
-        project_type = st.selectbox("Project type", ["Biobased", "Regulier"], index=0)
         button = st.button("Save changes")
         if button:
             st.success("Changes saved")

@@ -1,14 +1,16 @@
 """ Handles the loading and saving of spatial data and scenarios in the session state.
 Needs to be imported in all pages that use spatial data or scenarios."""
 
+import os
 import pickle
 import os
 from copy import deepcopy
 
 import geopandas as gpd
 import numpy as np
-import pandas as pd
 import streamlit as st
+from utils.paths import BUILDINGS_FILE, SCENARIO_DIR
+
 from utils.paths import BUILDINGS_FILE, SCENARIO_DIR
 
 session = st.session_state
@@ -43,11 +45,12 @@ def load_bag_data():
 
 def load_scenario_from_file(scenario_collection_name="scenario_data", load_new=False):
     """
-    Load the data from a pickle assign it as a dictionary to the session state variable.
-    Only execute this function if the session state variable does not contain a key called "scenarios"
-    Add load_new = True to force loading a new file and overwrite the current session state variable.
+    Load the data from a pickle assign it as a dictionar to the session state variable.
+    Only execute this function if the session state variable does not contain a key
+    called "scenarios". Add load_new = True to force loading a new file and overwrite
+    the current session state variable.
     """
-    if not "scenarios" in session or load_new:
+    if "scenarios" not in session or load_new:
         try:
             filename = os.path.join(SCENARIO_DIR, f"{scenario_collection_name}.pickle")
             with open(filename, "rb") as f:
